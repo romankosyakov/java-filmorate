@@ -233,4 +233,56 @@ class UserControllerTest {
 
         assertEquals(initialCount, finalCount, "Количество пользователей не должно меняться при обновлении");
     }
+
+    @Test
+    void shouldThrowValidationExceptionWhenUserEmailIsInvalid() {
+        User user = User.builder()
+                .email("invalid-email") // email без @
+                .login("validlogin")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .build();
+
+        assertThrows(ValidationException.class, () -> {
+            userController.addNewUser(user);
+        }, "Должно выбрасываться исключение при невалидном email");
+    }
+
+    @Test
+    void shouldThrowValidationExceptionWhenUserLoginIsBlank() {
+        User user = User.builder()
+                .email("valid@email.com")
+                .login("") // пустой логин
+                .birthday(LocalDate.of(1990, 1, 1))
+                .build();
+
+        assertThrows(ValidationException.class, () -> {
+            userController.addNewUser(user);
+        }, "Должно выбрасываться исключение при пустом логине");
+    }
+
+    @Test
+    void shouldThrowValidationExceptionWhenUserLoginContainsSpaces() {
+        User user = User.builder()
+                .email("valid@email.com")
+                .login("login with spaces") // логин с пробелами
+                .birthday(LocalDate.of(1990, 1, 1))
+                .build();
+
+        assertThrows(ValidationException.class, () -> {
+            userController.addNewUser(user);
+        }, "Должно выбрасываться исключение при логине с пробелами");
+    }
+
+    @Test
+    void shouldThrowValidationExceptionWhenUserBirthdayIsInFuture() {
+        User user = User.builder()
+                .email("valid@email.com")
+                .login("validlogin")
+                .birthday(LocalDate.now().plusDays(1)) // дата в будущем
+                .build();
+
+        assertThrows(ValidationException.class, () -> {
+            userController.addNewUser(user);
+        }, "Должно выбрасываться исключение при дате рождения в будущем");
+    }
 }

@@ -6,6 +6,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.yandex.practicum.filmorate.dto.ErrorResponse;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
@@ -16,26 +17,23 @@ import java.util.Map;
 @Slf4j
 public class ErrorHandler {
 
-    // Обработка ValidationException
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleValidationException(final ValidationException e) {
+    public ErrorResponse handleValidationException(final ValidationException e) {
         log.error("Ошибка валидации: {}", e.getMessage());
-        return Map.of("error", "Ошибка валидации", "message", e.getMessage());
+        return new ErrorResponse("Validation Error", e.getMessage());
     }
 
-    // Обработка NotFoundException
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleNotFoundException(final NotFoundException e) {
+    public ErrorResponse handleNotFoundException(final NotFoundException e) {
         log.error("Объект не найден: {}", e.getMessage());
-        return Map.of("error", "Объект не найден", "message", e.getMessage());
+        return new ErrorResponse("Not Found", e.getMessage());
     }
 
-    // Обработка ошибок валидации Spring (@Valid)
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleMethodArgumentNotValid(final MethodArgumentNotValidException e) {
+    public ErrorResponse handleMethodArgumentNotValid(final MethodArgumentNotValidException e) {
         Map<String, String> errors = new HashMap<>();
         e.getBindingResult().getFieldErrors().forEach(error -> {
             String fieldName = error.getField();
@@ -43,14 +41,13 @@ public class ErrorHandler {
             errors.put(fieldName, errorMessage);
         });
         log.error("Ошибки валидации полей: {}", errors);
-        return errors;
+        return new ErrorResponse("Validation Error", "Invalid request parameters", errors);
     }
 
-    // Обработка всех остальных исключений
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> handleOtherExceptions(final Throwable e) {
-        log.error("Внутренняя ошибка сервера: {}", e.getMessage());
-        return Map.of("error", "Внутренняя ошибка сервера");
+    public ErrorResponse handleOtherExceptions(final Throwable e) {
+        log.error("Внутренняя ошибка сервера: {}", e.getMessage(), e);
+        return new ErrorResponse("Internal Server Error", "An unexpected error occurred");
     }
 }

@@ -18,7 +18,7 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 public class Film {
-    private final int id;
+    private final Integer id;
 
     @NotBlank(message = "Название фильма не может быть пустым")
     @Size(max = 100, message = "Название фильма не может быть длиннее 100 символов")
@@ -32,5 +32,5 @@ public class Film {
     private final LocalDate releaseDate;
 
     @Positive(message = "Продолжительность фильма должна быть положительным числом")
-    private final int duration;
+    private final Integer duration;
 }

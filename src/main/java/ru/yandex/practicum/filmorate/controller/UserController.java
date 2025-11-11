@@ -8,6 +8,8 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import jakarta.validation.Valid;
+
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,24 +58,25 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateUser(@Valid @RequestBody User user) {
-        if (user.getId() == null) {
+    public User updateUser(@RequestBody User userUpdate) {
+        if (userUpdate.getId() == null) {
             throw new ValidationException("ID пользователя обязателен для обновления");
         }
 
-        if (!users.containsKey(user.getId())) {
-            throw new NotFoundException("Пользователь с ID " + user.getId() + " не найден");
+        User existingUser = users.get(userUpdate.getId());
+        if (existingUser == null) {
+            throw new NotFoundException("Пользователь с ID " + userUpdate.getId() + " не найден");
         }
 
-        validateUser(user);
-
         User updatedUser = User.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .login(user.getLogin())
-                .name(user.getName())
-                .birthday(user.getBirthday())
+                .id(existingUser.getId())
+                .email(userUpdate.getEmail() != null ? userUpdate.getEmail() : existingUser.getEmail())
+                .login(userUpdate.getLogin() != null ? userUpdate.getLogin() : existingUser.getLogin())
+                .name(userUpdate.getName() != null ? userUpdate.getName() : existingUser.getName())
+                .birthday(userUpdate.getBirthday() != null ? userUpdate.getBirthday() : existingUser.getBirthday())
                 .build();
+
+        validateUser(updatedUser);
 
         users.put(updatedUser.getId(), updatedUser);
         log.info("Обновлен пользователь: '{}' (ID: {})",
@@ -83,12 +86,20 @@ public class UserController {
     }
 
     private void validateUser(User user) {
-        if (user.getLogin() != null && user.getLogin().contains(" ")) {
+        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+            throw new ValidationException("Email должен быть валидным и содержать @");
+        }
+
+        if (user.getLogin() == null || user.getLogin().isBlank()) {
+            throw new ValidationException("Логин не может быть пустым");
+        }
+
+        if (user.getLogin().contains(" ")) {
             throw new ValidationException("Логин не может содержать пробелы");
         }
 
-        if (user.getName() != null && user.getName().isBlank()) {
-            throw new ValidationException("Имя не может быть пустым");
+        if (user.getBirthday() != null && user.getBirthday().isAfter(LocalDate.now())) {
+            throw new ValidationException("Дата рождения не может быть в будущем");
         }
     }
 }

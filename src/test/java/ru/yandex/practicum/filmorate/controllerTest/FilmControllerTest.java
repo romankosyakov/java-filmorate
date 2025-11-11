@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
@@ -174,5 +175,62 @@ class FilmControllerTest {
         int finalCount = filmController.getAllFilms().size();
 
         assertEquals(initialCount, finalCount, "Количество фильмов не должно меняться при обновлении");
+    }
+
+    @Test
+    void shouldThrowValidationExceptionWhenFilmNameIsBlank() {
+        Film film = Film.builder()
+                .name("")
+                .description("Valid description")
+                .releaseDate(LocalDate.of(2000, 1, 1))
+                .duration(120)
+                .build();
+
+        assertThrows(ValidationException.class, () -> {
+            filmController.addNewFilm(film);
+        }, "Должно выбрасываться исключение при пустом названии фильма");
+    }
+
+    @Test
+    void shouldThrowValidationExceptionWhenFilmDescriptionIsTooLong() {
+        String longDescription = "A".repeat(201); // 201 символ
+        Film film = Film.builder()
+                .name("Valid Film")
+                .description(longDescription)
+                .releaseDate(LocalDate.of(2000, 1, 1))
+                .duration(120)
+                .build();
+
+        assertThrows(ValidationException.class, () -> {
+            filmController.addNewFilm(film);
+        }, "Должно выбрасываться исключение при описании длиннее 200 символов");
+    }
+
+    @Test
+    void shouldThrowValidationExceptionWhenFilmReleaseDateIsBeforeMinDate() {
+        Film film = Film.builder()
+                .name("Valid Film")
+                .description("Valid description")
+                .releaseDate(LocalDate.of(1895, 12, 27)) // день до минимальной даты
+                .duration(120)
+                .build();
+
+        assertThrows(ValidationException.class, () -> {
+            filmController.addNewFilm(film);
+        }, "Должно выбрасываться исключение при дате релиза раньше 28.12.1895");
+    }
+
+    @Test
+    void shouldThrowValidationExceptionWhenFilmDurationIsZero() {
+        Film film = Film.builder()
+                .name("Valid Film")
+                .description("Valid description")
+                .releaseDate(LocalDate.of(2000, 1, 1))
+                .duration(0)
+                .build();
+
+        assertThrows(ValidationException.class, () -> {
+            filmController.addNewFilm(film);
+        }, "Должно выбрасываться исключение при продолжительности 0");
     }
 }
