@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
@@ -114,6 +113,31 @@ class FilmControllerTest {
     }
 
     @Test
+    void shouldUpdateFilmPartially() {
+        Film film = Film.builder()
+                .name("Original Film")
+                .description("Original Description")
+                .releaseDate(LocalDate.of(2000, 1, 1))
+                .duration(120)
+                .build();
+
+        Film createdFilm = filmController.addNewFilm(film);
+
+        // Обновляем только название
+        Film updatedFilm = Film.builder()
+                .id(createdFilm.getId())
+                .name("Updated Film Only Name")
+                .build();
+
+        Film result = filmController.updateFilm(updatedFilm);
+
+        assertEquals(createdFilm.getId(), result.getId());
+        assertEquals("Updated Film Only Name", result.getName());
+        assertEquals("Original Description", result.getDescription()); // осталось прежним
+        assertEquals(120, result.getDuration()); // осталось прежним
+    }
+
+    @Test
     void shouldThrowExceptionWhenUpdatingNonExistentFilm() {
         Film film = Film.builder()
                 .id(999)
@@ -178,59 +202,42 @@ class FilmControllerTest {
     }
 
     @Test
-    void shouldThrowValidationExceptionWhenFilmNameIsBlank() {
+    void shouldAcceptValidFilmForCreation() {
         Film film = Film.builder()
-                .name("")
-                .description("Valid description")
+                .name("Valid Film")
+                .description("Valid description within 200 chars")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
                 .build();
 
-        assertThrows(ValidationException.class, () -> {
-            filmController.addNewFilm(film);
-        }, "Должно выбрасываться исключение при пустом названии фильма");
+        Film createdFilm = filmController.addNewFilm(film);
+
+        assertNotNull(createdFilm);
+        assertEquals("Valid Film", createdFilm.getName());
     }
 
     @Test
-    void shouldThrowValidationExceptionWhenFilmDescriptionIsTooLong() {
-        String longDescription = "A".repeat(201); // 201 символ
+    void shouldAcceptValidFilmForUpdate() {
         Film film = Film.builder()
-                .name("Valid Film")
-                .description(longDescription)
+                .name("Original Film")
+                .description("Original Description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
                 .build();
 
-        assertThrows(ValidationException.class, () -> {
-            filmController.addNewFilm(film);
-        }, "Должно выбрасываться исключение при описании длиннее 200 символов");
-    }
+        Film createdFilm = filmController.addNewFilm(film);
 
-    @Test
-    void shouldThrowValidationExceptionWhenFilmReleaseDateIsBeforeMinDate() {
-        Film film = Film.builder()
-                .name("Valid Film")
-                .description("Valid description")
-                .releaseDate(LocalDate.of(1895, 12, 27)) // день до минимальной даты
-                .duration(120)
+        Film updatedFilm = Film.builder()
+                .id(createdFilm.getId())
+                .name("Updated Film")
+                .description("Updated description")
+                .releaseDate(LocalDate.of(2001, 1, 1))
+                .duration(150)
                 .build();
 
-        assertThrows(ValidationException.class, () -> {
-            filmController.addNewFilm(film);
-        }, "Должно выбрасываться исключение при дате релиза раньше 28.12.1895");
-    }
+        Film result = filmController.updateFilm(updatedFilm);
 
-    @Test
-    void shouldThrowValidationExceptionWhenFilmDurationIsZero() {
-        Film film = Film.builder()
-                .name("Valid Film")
-                .description("Valid description")
-                .releaseDate(LocalDate.of(2000, 1, 1))
-                .duration(0)
-                .build();
-
-        assertThrows(ValidationException.class, () -> {
-            filmController.addNewFilm(film);
-        }, "Должно выбрасываться исключение при продолжительности 0");
+        assertNotNull(result);
+        assertEquals("Updated Film", result.getName());
     }
 }

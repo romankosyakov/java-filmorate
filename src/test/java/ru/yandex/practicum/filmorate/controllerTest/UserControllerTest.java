@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -143,17 +142,28 @@ class UserControllerTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenUpdatingUserWithoutId() {
+    void shouldUpdateUserPartially() {
         User user = User.builder()
-                .email("test@mail.com")
-                .login("testuser")
-                .name("Test User")
+                .email("original@mail.com")
+                .login("originaluser")
+                .name("Original User")
                 .birthday(LocalDate.of(2000, 1, 1))
                 .build();
 
-        assertThrows(ValidationException.class, () -> {
-            userController.updateUser(user);
-        }, "Должно выбрасываться исключение при обновлении пользователя без ID");
+        User createdUser = userController.addNewUser(user);
+
+        // Обновляем только email
+        User updatedUser = User.builder()
+                .id(createdUser.getId())
+                .email("updated@mail.com")
+                .build();
+
+        User result = userController.updateUser(updatedUser);
+
+        assertEquals(createdUser.getId(), result.getId());
+        assertEquals("updated@mail.com", result.getEmail());
+        assertEquals("originaluser", result.getLogin()); // остался прежним
+        assertEquals("Original User", result.getName()); // осталось прежним
     }
 
     @Test
@@ -169,20 +179,6 @@ class UserControllerTest {
         assertThrows(NotFoundException.class, () -> {
             userController.updateUser(user);
         }, "Должно выбрасываться исключение при обновлении несуществующего пользователя");
-    }
-
-    @Test
-    void shouldThrowExceptionWhenLoginContainsSpaces() {
-        User user = User.builder()
-                .email("test@mail.com")
-                .login("login with spaces")
-                .name("Test User")
-                .birthday(LocalDate.of(2000, 1, 1))
-                .build();
-
-        assertThrows(ValidationException.class, () -> {
-            userController.addNewUser(user);
-        }, "Должно выбрасываться исключение при логине с пробелами");
     }
 
     @Test
@@ -235,54 +231,42 @@ class UserControllerTest {
     }
 
     @Test
-    void shouldThrowValidationExceptionWhenUserEmailIsInvalid() {
+    void shouldAcceptValidUserForCreation() {
         User user = User.builder()
-                .email("invalid-email") // email без @
-                .login("validlogin")
-                .birthday(LocalDate.of(1990, 1, 1))
+                .email("valid@email.com")
+                .login("validuser")
+                .name("Valid User")
+                .birthday(LocalDate.of(2000, 1, 1))
                 .build();
 
-        assertThrows(ValidationException.class, () -> {
-            userController.addNewUser(user);
-        }, "Должно выбрасываться исключение при невалидном email");
+        User createdUser = userController.addNewUser(user);
+
+        assertNotNull(createdUser);
+        assertEquals("valid@email.com", createdUser.getEmail());
     }
 
     @Test
-    void shouldThrowValidationExceptionWhenUserLoginIsBlank() {
+    void shouldAcceptValidUserForUpdate() {
         User user = User.builder()
-                .email("valid@email.com")
-                .login("") // пустой логин
-                .birthday(LocalDate.of(1990, 1, 1))
+                .email("original@mail.com")
+                .login("originaluser")
+                .name("Original User")
+                .birthday(LocalDate.of(2000, 1, 1))
                 .build();
 
-        assertThrows(ValidationException.class, () -> {
-            userController.addNewUser(user);
-        }, "Должно выбрасываться исключение при пустом логине");
-    }
+        User createdUser = userController.addNewUser(user);
 
-    @Test
-    void shouldThrowValidationExceptionWhenUserLoginContainsSpaces() {
-        User user = User.builder()
-                .email("valid@email.com")
-                .login("login with spaces") // логин с пробелами
-                .birthday(LocalDate.of(1990, 1, 1))
+        User updatedUser = User.builder()
+                .id(createdUser.getId())
+                .email("updated@mail.com")
+                .login("updateduser")
+                .name("Updated User")
+                .birthday(LocalDate.of(2001, 1, 1))
                 .build();
 
-        assertThrows(ValidationException.class, () -> {
-            userController.addNewUser(user);
-        }, "Должно выбрасываться исключение при логине с пробелами");
-    }
+        User result = userController.updateUser(updatedUser);
 
-    @Test
-    void shouldThrowValidationExceptionWhenUserBirthdayIsInFuture() {
-        User user = User.builder()
-                .email("valid@email.com")
-                .login("validlogin")
-                .birthday(LocalDate.now().plusDays(1)) // дата в будущем
-                .build();
-
-        assertThrows(ValidationException.class, () -> {
-            userController.addNewUser(user);
-        }, "Должно выбрасываться исключение при дате рождения в будущем");
+        assertNotNull(result);
+        assertEquals("updated@mail.com", result.getEmail());
     }
 }

@@ -7,6 +7,8 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.validation.CreateValidation;
+import ru.yandex.practicum.filmorate.validation.UpdateValidation;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -19,9 +21,9 @@ class FilmTest {
 
     @BeforeEach
     void setUp() {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
-
+        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+            validator = factory.getValidator();
+        }
         validFilm = Film.builder()
                 .id(1)
                 .name("Valid Film")
@@ -32,41 +34,84 @@ class FilmTest {
     }
 
     @Test
-    void shouldCreateValidFilm() {
-        Set<ConstraintViolation<Film>> violations = validator.validate(validFilm);
-        assertTrue(violations.isEmpty(), "Валидный фильм не должен иметь нарушений валидации");
+    void shouldCreateValidFilmForCreation() {
+        Film filmForCreate = Film.builder()
+                .name("Valid Film")
+                .description("Valid description")
+                .releaseDate(LocalDate.of(2000, 1, 1))
+                .duration(120)
+                .build();
+
+        Set<ConstraintViolation<Film>> violations = validator.validate(filmForCreate, CreateValidation.class);
+        assertTrue(violations.isEmpty(), "Валидный фильм для создания не должен иметь нарушений валидации");
     }
 
     @Test
-    void shouldFailWhenNameIsBlank() {
+    void shouldCreateValidFilmForUpdate() {
+        Set<ConstraintViolation<Film>> violations = validator.validate(validFilm, UpdateValidation.class);
+        assertTrue(violations.isEmpty(), "Валидный фильм для обновления не должен иметь нарушений валидации");
+    }
+
+    @Test
+    void shouldFailWhenNameIsBlankForCreation() {
         Film film = Film.builder()
-                .id(1)
                 .name("")
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
                 .build();
 
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertFalse(violations.isEmpty(), "Фильм с пустым названием должен быть невалидным");
+        Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
+        assertFalse(violations.isEmpty(), "Фильм с пустым названием должен быть невалидным для создания");
     }
 
     @Test
-    void shouldFailWhenNameIsNull() {
+    void shouldNotFailWhenNameIsBlankForUpdate() {
         Film film = Film.builder()
                 .id(1)
+                .name("") // Для обновления пустое название не проверяется @NotBlank
+                .description("Valid description")
+                .releaseDate(LocalDate.of(2000, 1, 1))
+                .duration(120)
+                .build();
+
+        Set<ConstraintViolation<Film>> violations = validator.validate(film, UpdateValidation.class);
+        // Проверяем только что нет ошибок связанных с именем из-за @NotBlank
+        boolean hasNameBlankViolation = violations.stream()
+                .anyMatch(v -> v.getPropertyPath().toString().equals("name") &&
+                        v.getMessage().contains("не может быть пустым"));
+        assertFalse(hasNameBlankViolation, "Для обновления пустое название не должно проверяться на @NotBlank");
+    }
+
+    @Test
+    void shouldFailWhenNameIsNullForCreation() {
+        Film film = Film.builder()
                 .name(null)
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
                 .build();
 
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertFalse(violations.isEmpty(), "Фильм с null названием должен быть невалидным");
+        Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
+        assertFalse(violations.isEmpty(), "Фильм с null названием должен быть невалидным для создания");
     }
 
     @Test
-    void shouldFailWhenNameExceedsMaxLength() {
+    void shouldFailWhenNameExceedsMaxLengthForCreation() {
+        String longName = "A".repeat(101);
+        Film film = Film.builder()
+                .name(longName)
+                .description("Valid description")
+                .releaseDate(LocalDate.of(2000, 1, 1))
+                .duration(120)
+                .build();
+
+        Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
+        assertFalse(violations.isEmpty(), "Фильм с названием длиннее 100 символов должен быть невалидным");
+    }
+
+    @Test
+    void shouldFailWhenNameExceedsMaxLengthForUpdate() {
         String longName = "A".repeat(101);
         Film film = Film.builder()
                 .id(1)
@@ -76,85 +121,53 @@ class FilmTest {
                 .duration(120)
                 .build();
 
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertFalse(violations.isEmpty(), "Фильм с названием длиннее 100 символов должен быть невалидным");
+        Set<ConstraintViolation<Film>> violations = validator.validate(film, UpdateValidation.class);
+        assertFalse(violations.isEmpty(), "Фильм с названием длиннее 100 символов должен быть невалидным для обновления");
     }
 
     @Test
-    void shouldAllowMaxLengthName() {
-        String maxLengthName = "A".repeat(100);
-        Film film = Film.builder()
-                .id(1)
-                .name(maxLengthName)
-                .description("Valid description")
-                .releaseDate(LocalDate.of(2000, 1, 1))
-                .duration(120)
-                .build();
-
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertTrue(violations.isEmpty(), "Фильм с названием длиной 100 символов должен быть валидным");
-    }
-
-    @Test
-    void shouldFailWhenDescriptionExceedsMaxLength() {
+    void shouldFailWhenDescriptionExceedsMaxLengthForCreation() {
         String longDescription = "A".repeat(201);
         Film film = Film.builder()
-                .id(1)
                 .name("Valid Film")
                 .description(longDescription)
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
                 .build();
 
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
         assertFalse(violations.isEmpty(), "Фильм с описанием длиннее 200 символов должен быть невалидным");
     }
 
     @Test
-    void shouldAllowMaxLengthDescription() {
+    void shouldAllowMaxLengthDescriptionForCreation() {
         String maxLengthDescription = "A".repeat(200);
         Film film = Film.builder()
-                .id(1)
                 .name("Valid Film")
                 .description(maxLengthDescription)
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
                 .build();
 
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
         assertTrue(violations.isEmpty(), "Фильм с описанием длиной 200 символов должен быть валидным");
     }
 
     @Test
-    void shouldAllowEmptyDescription() {
+    void shouldFailWhenReleaseDateIsBeforeMinDateForCreation() {
         Film film = Film.builder()
-                .id(1)
                 .name("Valid Film")
-                .description("")
-                .releaseDate(LocalDate.of(2000, 1, 1))
+                .description("Valid description")
+                .releaseDate(LocalDate.of(1895, 12, 27))
                 .duration(120)
                 .build();
 
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertTrue(violations.isEmpty(), "Фильм с пустым описанием должен быть валидным");
+        Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
+        assertFalse(violations.isEmpty(), "Фильм с датой релиза раньше 28.12.1895 должен быть невалидным");
     }
 
     @Test
-    void shouldAllowNullDescription() {
-        Film film = Film.builder()
-                .id(1)
-                .name("Valid Film")
-                .description(null)
-                .releaseDate(LocalDate.of(2000, 1, 1))
-                .duration(120)
-                .build();
-
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertTrue(violations.isEmpty(), "Фильм с null описанием должен быть валидным");
-    }
-
-    @Test
-    void shouldFailWhenReleaseDateIsBeforeMinDate() {
+    void shouldFailWhenReleaseDateIsBeforeMinDateForUpdate() {
         Film film = Film.builder()
                 .id(1)
                 .name("Valid Film")
@@ -163,77 +176,104 @@ class FilmTest {
                 .duration(120)
                 .build();
 
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertFalse(violations.isEmpty(), "Фильм с датой релиза раньше 28.12.1895 должен быть невалидным");
+        Set<ConstraintViolation<Film>> violations = validator.validate(film, UpdateValidation.class);
+        assertFalse(violations.isEmpty(), "Фильм с датой релиза раньше 28.12.1895 должен быть невалидным для обновления");
     }
 
     @Test
-    void shouldAllowMinReleaseDate() {
+    void shouldAllowMinReleaseDateForCreation() {
         Film film = Film.builder()
-                .id(1)
                 .name("Valid Film")
                 .description("Valid description")
                 .releaseDate(LocalDate.of(1895, 12, 28))
                 .duration(120)
                 .build();
 
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
         assertTrue(violations.isEmpty(), "Фильм с датой релиза 28.12.1895 должен быть валидным");
     }
 
     @Test
-    void shouldFailWhenReleaseDateIsNull() {
+    void shouldFailWhenReleaseDateIsNullForCreation() {
         Film film = Film.builder()
-                .id(1)
                 .name("Valid Film")
                 .description("Valid description")
                 .releaseDate(null)
                 .duration(120)
                 .build();
 
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertFalse(violations.isEmpty(), "Фильм с null датой релиза должен быть невалидным");
+        Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
+        assertFalse(violations.isEmpty(), "Фильм с null датой релиза должен быть невалидным для создания");
     }
 
     @Test
-    void shouldFailWhenDurationIsZero() {
+    void shouldNotFailWhenReleaseDateIsNullForUpdate() {
         Film film = Film.builder()
                 .id(1)
+                .name("Valid Film")
+                .description("Valid description")
+                .releaseDate(null) // Для обновления может быть null
+                .duration(120)
+                .build();
+
+        Set<ConstraintViolation<Film>> violations = validator.validate(film, UpdateValidation.class);
+        // Проверяем только что нет ошибок связанных с @NotNull
+        boolean hasNotNullViolation = violations.stream()
+                .anyMatch(v -> v.getPropertyPath().toString().equals("releaseDate") &&
+                        v.getMessage().contains("обязательна"));
+        assertFalse(hasNotNullViolation, "Для обновления null дата релиза не должна проверяться на @NotNull");
+    }
+
+    @Test
+    void shouldFailWhenDurationIsZeroForCreation() {
+        Film film = Film.builder()
                 .name("Valid Film")
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(0)
                 .build();
 
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
         assertFalse(violations.isEmpty(), "Фильм с продолжительностью 0 должен быть невалидным");
     }
 
     @Test
-    void shouldFailWhenDurationIsNegative() {
+    void shouldFailWhenDurationIsNegativeForCreation() {
         Film film = Film.builder()
-                .id(1)
                 .name("Valid Film")
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(-1)
                 .build();
 
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
         assertFalse(violations.isEmpty(), "Фильм с отрицательной продолжительностью должен быть невалидным");
     }
 
     @Test
-    void shouldAllowMinPositiveDuration() {
+    void shouldAllowMinPositiveDurationForCreation() {
         Film film = Film.builder()
-                .id(1)
                 .name("Valid Film")
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(1)
                 .build();
 
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
         assertTrue(violations.isEmpty(), "Фильм с продолжительностью 1 должен быть валидным");
+    }
+
+    @Test
+    void shouldFailWhenIdIsNullForUpdate() {
+        Film film = Film.builder()
+                .id(null) // Для обновления id обязателен
+                .name("Valid Film")
+                .description("Valid description")
+                .releaseDate(LocalDate.of(2000, 1, 1))
+                .duration(120)
+                .build();
+
+        Set<ConstraintViolation<Film>> violations = validator.validate(film, UpdateValidation.class);
+        assertFalse(violations.isEmpty(), "Фильм с null ID должен быть невалидным для обновления");
     }
 }

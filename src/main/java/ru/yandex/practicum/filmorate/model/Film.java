@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.annotation.MinReleaseDate;
+import ru.yandex.practicum.filmorate.validation.CreateValidation;
+import ru.yandex.practicum.filmorate.validation.UpdateValidation;
 
 import java.time.LocalDate;
 
@@ -18,19 +20,23 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 public class Film {
+    @NotNull(groups = UpdateValidation.class, message = "ID фильма обязателен для обновления")
     private final Integer id;
 
-    @NotBlank(message = "Название фильма не может быть пустым")
-    @Size(max = 100, message = "Название фильма не может быть длиннее 100 символов")
+    @NotBlank(message = "Название фильма не может быть пустым", groups = CreateValidation.class)
+    @Size(max = 100, message = "Название фильма не может быть длиннее 100 символов",
+            groups = {CreateValidation.class, UpdateValidation.class})
     private final String name;
 
-    @Size(max = 200, message = "Описание фильма не может быть длиннее 200 символов")
+    @Size(max = 200, message = "Описание фильма не может быть длиннее 200 символов",
+            groups = {CreateValidation.class, UpdateValidation.class})
     private String description;
 
-    @NotNull(message = "Дата релиза обязательна")
-    @MinReleaseDate
+    @NotNull(message = "Дата релиза обязательна", groups = CreateValidation.class)
+    @MinReleaseDate(groups = {CreateValidation.class, UpdateValidation.class})
     private final LocalDate releaseDate;
 
-    @Positive(message = "Продолжительность фильма должна быть положительным числом")
+    @Positive(message = "Продолжительность фильма должна быть положительным числом",
+            groups = {CreateValidation.class, UpdateValidation.class})
     private final Integer duration;
 }

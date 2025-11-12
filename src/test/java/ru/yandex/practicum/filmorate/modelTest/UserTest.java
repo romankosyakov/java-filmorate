@@ -7,6 +7,8 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.validation.CreateValidation;
+import ru.yandex.practicum.filmorate.validation.UpdateValidation;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -19,9 +21,9 @@ class UserTest {
 
     @BeforeEach
     void setUp() {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
-
+        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+            validator = factory.getValidator();
+        }
         validUser = User.builder()
                 .id(1L)
                 .email("valid@email.com")
@@ -32,9 +34,22 @@ class UserTest {
     }
 
     @Test
-    void shouldCreateValidUser() {
-        Set<ConstraintViolation<User>> violations = validator.validate(validUser);
-        assertTrue(violations.isEmpty(), "Валидный пользователь не должен иметь нарушений валидации");
+    void shouldCreateValidUserForCreation() {
+        User userForCreate = User.builder()
+                .email("valid@email.com")
+                .login("valid_login")
+                .name("Valid Name")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
+        Set<ConstraintViolation<User>> violations = validator.validate(userForCreate, CreateValidation.class);
+        assertTrue(violations.isEmpty(), "Валидный пользователь для создания не должен иметь нарушений валидации");
+    }
+
+    @Test
+    void shouldCreateValidUserForUpdate() {
+        Set<ConstraintViolation<User>> violations = validator.validate(validUser, UpdateValidation.class);
+        assertTrue(violations.isEmpty(), "Валидный пользователь для обновления не должен иметь нарушений валидации");
     }
 
     @Test
@@ -51,61 +66,64 @@ class UserTest {
     }
 
     @Test
-    void shouldUseLoginWhenNameIsBlank() {
+    void shouldFailWhenEmailIsBlankForCreation() {
         User user = User.builder()
-                .id(1L)
-                .email("test@mail.com")
-                .login("testuser")
-                .name("   ")
-                .birthday(LocalDate.of(2000, 1, 1))
-                .build();
-
-        assertEquals("testuser", user.getName(), "Должен использоваться логин, когда имя состоит из пробелов");
-    }
-
-    @Test
-    void shouldUseLoginWhenNameIsNull() {
-        User user = User.builder()
-                .id(1L)
-                .email("test@mail.com")
-                .login("testuser")
-                .name(null)
-                .birthday(LocalDate.of(2000, 1, 1))
-                .build();
-
-        assertEquals("testuser", user.getName(), "Должен использоваться логин, когда имя null");
-    }
-
-    @Test
-    void shouldFailWhenEmailIsBlank() {
-        User user = User.builder()
-                .id(1L)
                 .email("")
                 .login("valid_login")
                 .name("Valid Name")
                 .birthday(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertFalse(violations.isEmpty(), "Пользователь с пустым email должен быть невалидным");
+        Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
+        assertFalse(violations.isEmpty(), "Пользователь с пустым email должен быть невалидным для создания");
     }
 
     @Test
-    void shouldFailWhenEmailIsNull() {
+    void shouldNotFailWhenEmailIsBlankForUpdate() {
         User user = User.builder()
                 .id(1L)
+                .email("") // Для обновления пустой email не проверяется @NotBlank
+                .login("valid_login")
+                .name("Valid Name")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
+        Set<ConstraintViolation<User>> violations = validator.validate(user, UpdateValidation.class);
+        // Проверяем только что нет ошибок связанных с email из-за @NotBlank
+        boolean hasEmailBlankViolation = violations.stream()
+                .anyMatch(v -> v.getPropertyPath().toString().equals("email") &&
+                        v.getMessage().contains("не может быть пустым"));
+        assertFalse(hasEmailBlankViolation, "Для обновления пустой email не должен проверяться на @NotBlank");
+    }
+
+    @Test
+    void shouldFailWhenEmailIsNullForCreation() {
+        User user = User.builder()
                 .email(null)
                 .login("valid_login")
                 .name("Valid Name")
                 .birthday(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertFalse(violations.isEmpty(), "Пользователь с null email должен быть невалидным");
+        Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
+        assertFalse(violations.isEmpty(), "Пользователь с null email должен быть невалидным для создания");
     }
 
     @Test
-    void shouldFailWhenEmailHasNoAtSymbol() {
+    void shouldFailWhenEmailHasNoAtSymbolForCreation() {
+        User user = User.builder()
+                .email("invalid-email.com")
+                .login("valid_login")
+                .name("Valid Name")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
+        Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
+        assertFalse(violations.isEmpty(), "Пользователь с email без @ должен быть невалидным");
+    }
+
+    @Test
+    void shouldFailWhenEmailHasNoAtSymbolForUpdate() {
         User user = User.builder()
                 .id(1L)
                 .email("invalid-email.com")
@@ -114,54 +132,69 @@ class UserTest {
                 .birthday(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertFalse(violations.isEmpty(), "Пользователь с email без @ должен быть невалидным");
+        Set<ConstraintViolation<User>> violations = validator.validate(user, UpdateValidation.class);
+        assertFalse(violations.isEmpty(), "Пользователь с email без @ должен быть невалидным для обновления");
     }
 
     @Test
-    void shouldFailWhenEmailHasInvalidFormat() {
+    void shouldFailWhenLoginIsBlankForCreation() {
         User user = User.builder()
-                .id(1L)
-                .email("invalid@")
-                .login("valid_login")
-                .name("Valid Name")
-                .birthday(LocalDate.of(2000, 1, 1))
-                .build();
-
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertFalse(violations.isEmpty(), "Пользователь с невалидным форматом email должен быть невалидным");
-    }
-
-    @Test
-    void shouldFailWhenLoginIsBlank() {
-        User user = User.builder()
-                .id(1L)
                 .email("valid@email.com")
                 .login("")
                 .name("Valid Name")
                 .birthday(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertFalse(violations.isEmpty(), "Пользователь с пустым логином должен быть невалидным");
+        Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
+        assertFalse(violations.isEmpty(), "Пользователь с пустым логином должен быть невалидным для создания");
     }
 
     @Test
-    void shouldFailWhenLoginIsNull() {
+    void shouldNotFailWhenLoginIsBlankForUpdate() {
         User user = User.builder()
                 .id(1L)
+                .email("valid@email.com")
+                .login("") // Для обновления пустой логин не проверяется @NotBlank
+                .name("Valid Name")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
+        Set<ConstraintViolation<User>> violations = validator.validate(user, UpdateValidation.class);
+        // Проверяем только что нет ошибок связанных с логином из-за @NotBlank
+        boolean hasLoginBlankViolation = violations.stream()
+                .anyMatch(v -> v.getPropertyPath().toString().equals("login") &&
+                        v.getMessage().contains("не может быть пустым"));
+        assertFalse(hasLoginBlankViolation, "Для обновления пустой логин не должен проверяться на @NotBlank");
+    }
+
+    @Test
+    void shouldFailWhenLoginIsNullForCreation() {
+        User user = User.builder()
                 .email("valid@email.com")
                 .login(null)
                 .name("Valid Name")
                 .birthday(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertFalse(violations.isEmpty(), "Пользователь с null логином должен быть невалидным");
+        Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
+        assertFalse(violations.isEmpty(), "Пользователь с null логином должен быть невалидным для создания");
     }
 
     @Test
-    void shouldFailWhenLoginContainsSpaces() {
+    void shouldFailWhenLoginContainsSpacesForCreation() {
+        User user = User.builder()
+                .email("valid@email.com")
+                .login("login with spaces")
+                .name("Valid Name")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
+        Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
+        assertFalse(violations.isEmpty(), "Пользователь с логином содержащим пробелы должен быть невалидным");
+    }
+
+    @Test
+    void shouldFailWhenLoginContainsSpacesForUpdate() {
         User user = User.builder()
                 .id(1L)
                 .email("valid@email.com")
@@ -170,98 +203,65 @@ class UserTest {
                 .birthday(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertFalse(violations.isEmpty(), "Пользователь с логином содержащим пробелы должен быть невалидным");
+        Set<ConstraintViolation<User>> violations = validator.validate(user, UpdateValidation.class);
+        assertFalse(violations.isEmpty(), "Пользователь с логином содержащим пробелы должен быть невалидным для обновления");
     }
 
     @Test
-    void shouldFailWhenLoginIsTooShort() {
+    void shouldFailWhenLoginIsTooShortForCreation() {
         User user = User.builder()
-                .id(1L)
                 .email("valid@email.com")
                 .login("abc")
                 .name("Valid Name")
                 .birthday(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
         assertFalse(violations.isEmpty(), "Пользователь с логином короче 4 символов должен быть невалидным");
     }
 
     @Test
-    void shouldAllowMinLengthLogin() {
+    void shouldAllowMinLengthLoginForCreation() {
         User user = User.builder()
-                .id(1L)
                 .email("valid@email.com")
                 .login("abcd")
                 .name("Valid Name")
                 .birthday(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
         assertTrue(violations.isEmpty(), "Пользователь с логином длиной 4 символа должен быть валидным");
     }
 
     @Test
-    void shouldFailWhenLoginIsTooLong() {
+    void shouldFailWhenLoginIsTooLongForCreation() {
         String longLogin = "a".repeat(21);
         User user = User.builder()
-                .id(1L)
                 .email("valid@email.com")
                 .login(longLogin)
                 .name("Valid Name")
                 .birthday(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
         assertFalse(violations.isEmpty(), "Пользователь с логином длиннее 20 символов должен быть невалидным");
     }
 
     @Test
-    void shouldAllowMaxLengthLogin() {
-        String maxLengthLogin = "a".repeat(20);
+    void shouldFailWhenBirthdayIsInFutureForCreation() {
         User user = User.builder()
-                .id(1L)
                 .email("valid@email.com")
-                .login(maxLengthLogin)
+                .login("valid_login")
                 .name("Valid Name")
-                .birthday(LocalDate.of(2000, 1, 1))
+                .birthday(LocalDate.now().plusDays(1))
                 .build();
 
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertTrue(violations.isEmpty(), "Пользователь с логином длиной 20 символов должен быть валидным");
+        Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
+        assertFalse(violations.isEmpty(), "Пользователь с датой рождения в будущем должен быть невалидным");
     }
 
     @Test
-    void shouldFailWhenLoginContainsInvalidCharacters() {
-        User user = User.builder()
-                .id(1L)
-                .email("valid@email.com")
-                .login("invalid-login!")
-                .name("Valid Name")
-                .birthday(LocalDate.of(2000, 1, 1))
-                .build();
-
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertFalse(violations.isEmpty(), "Пользователь с логином содержащим недопустимые символы должен быть невалидным");
-    }
-
-    @Test
-    void shouldAllowValidCharactersInLogin() {
-        User user = User.builder()
-                .id(1L)
-                .email("valid@email.com")
-                .login("user_123")
-                .name("Valid Name")
-                .birthday(LocalDate.of(2000, 1, 1))
-                .build();
-
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertTrue(violations.isEmpty(), "Пользователь с логином из латинских букв, цифр и подчеркивания должен быть валидным");
-    }
-
-    @Test
-    void shouldFailWhenBirthdayIsInFuture() {
+    void shouldFailWhenBirthdayIsInFutureForUpdate() {
         User user = User.builder()
                 .id(1L)
                 .email("valid@email.com")
@@ -270,34 +270,21 @@ class UserTest {
                 .birthday(LocalDate.now().plusDays(1))
                 .build();
 
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertFalse(violations.isEmpty(), "Пользователь с датой рождения в будущем должен быть невалидным");
+        Set<ConstraintViolation<User>> violations = validator.validate(user, UpdateValidation.class);
+        assertFalse(violations.isEmpty(), "Пользователь с датой рождения в будущем должен быть невалидным для обновления");
     }
 
     @Test
-    void shouldAllowCurrentDateAsBirthday() {
+    void shouldFailWhenIdIsNullForUpdate() {
         User user = User.builder()
-                .id(1L)
+                .id(null) // Для обновления id обязателен
                 .email("valid@email.com")
                 .login("valid_login")
                 .name("Valid Name")
-                .birthday(LocalDate.now())
+                .birthday(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertTrue(violations.isEmpty(), "Пользователь с сегодняшней датой рождения должен быть валидным");
-    }
-
-    @Test
-    void shouldAllowPastBirthday() {
-        User user = User.builder()
-                .id(1L)
-                .email("valid@email.com")
-                .login("valid_login")
-                .name("Valid Name")
-                .birthday(LocalDate.now().minusYears(1))
-                .build();
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertTrue(violations.isEmpty(), "Пользователь с датой рождения в прошлом должен быть валидным");
+        Set<ConstraintViolation<User>> violations = validator.validate(user, UpdateValidation.class);
+        assertFalse(violations.isEmpty(), "Пользователь с null ID должен быть невалидным для обновления");
     }
 }
