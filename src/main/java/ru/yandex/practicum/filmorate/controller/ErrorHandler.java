@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.filmorate.dto.ErrorResponse;
-import ru.yandex.practicum.filmorate.exceptions.AutisticException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
@@ -33,13 +32,6 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleAutiscticException(final AutisticException e) {
-        log.warn("Бизнес-логика: {}", e.getMessage());
-        return new ErrorResponse("Business Logic Error", e.getMessage());
-    }
-
-    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentNotValid(final MethodArgumentNotValidException e) {
         Map<String, String> errors = new HashMap<>();
@@ -58,5 +50,4 @@ public class ErrorHandler {
         log.error("Внутренняя ошибка сервера: {}", e.getMessage(), e);
         return new ErrorResponse("Internal Server Error", "An unexpected error occurred");
     }
-
 }

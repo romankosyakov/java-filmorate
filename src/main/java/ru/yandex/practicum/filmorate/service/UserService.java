@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.AutisticException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -21,6 +20,10 @@ public class UserService {
     private final UserStorage userStorage;
 
     public void addFriend(Long userID, Long friendID) {
+        if (userID.equals(friendID)) {
+            throw new ValidationException("Пользователь не может добавить себя в друзья!");
+        }
+
         User[] users = getTwoUsers(userID, friendID);
         User firstUser = users[0];
         User secondUser = users[1];
@@ -36,6 +39,10 @@ public class UserService {
     }
 
     public void deleteFriend(Long userID, Long friendID) {
+        if (userID.equals(friendID)) {
+            throw new ValidationException("Пользователь не может удалить себя из друзей!");
+        }
+
         User[] users = getTwoUsers(userID, friendID);
         User firstUser = users[0];
         User secondUser = users[1];
@@ -60,10 +67,8 @@ public class UserService {
             throw new NotFoundException("Пользователь с ID " + userID + " не найден");
         }
 
-        if (user.getUserFriends().isEmpty()) {
-            throw new AutisticException("Пользователь не добавил пока никого в друзья! Список пуст.");
-        }
-        return Set.copyOf(user.getUserFriends());
+        // Возвращаем копию Set вместо исключения
+        return new HashSet<>(user.getUserFriends());
     }
 
     public Set<Long> getCommonFriends(Long firstUserID, Long secondUserID) {
@@ -72,19 +77,12 @@ public class UserService {
         User secondUser = users[1];
 
         Set<Long> firstUserFriends = new HashSet<>(firstUser.getUserFriends());
-        if (firstUserFriends.isEmpty()) {
-            throw new AutisticException("У пользователя с ID " + firstUserID + " нет друзей на данный момент.");
-        }
-
         Set<Long> secondUserFriends = new HashSet<>(secondUser.getUserFriends());
-        if (secondUserFriends.isEmpty()) {
-            throw new AutisticException("У пользователя с ID " + secondUserID + " нет друзей на данный момент.");
-        }
 
         Set<Long> commonFriends = new HashSet<>(firstUserFriends);
         commonFriends.retainAll(secondUserFriends);
 
-        return commonFriends;
+        return commonFriends; // Возвращаем пустой Set если нет общих друзей
     }
 
     private User[] getTwoUsers(Long firstID, Long secondID) {
@@ -92,9 +90,6 @@ public class UserService {
         User secondUser = userStorage.getUser(secondID);
         if (firstID <= 0 || secondID <= 0) {
             throw new ValidationException("ID должен быть больше нуля");
-        }
-        if (firstID == secondID) {
-            throw new AutisticException("Пользователь не может добавить себя в друзья!");
         }
         if (firstUser == null || secondUser == null) {
             long[] usersIDs = new long[2];

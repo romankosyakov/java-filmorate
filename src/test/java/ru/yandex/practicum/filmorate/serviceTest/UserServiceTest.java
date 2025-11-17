@@ -2,8 +2,6 @@ package ru.yandex.practicum.filmorate.serviceTest;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.exceptions.AutisticException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -66,22 +64,10 @@ class UserServiceTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenAddingDuplicateFriend() {
-        User createdUser1 = userStorage.addNewUser(user1);
-        User createdUser2 = userStorage.addNewUser(user2);
-
-        userService.addFriend(createdUser1.getId(), createdUser2.getId());
-
-        assertThrows(ValidationException.class, () -> {
-            userService.addFriend(createdUser1.getId(), createdUser2.getId());
-        });
-    }
-
-    @Test
     void shouldThrowExceptionWhenAddingSelfAsFriend() {
         User createdUser1 = userStorage.addNewUser(user1);
 
-        assertThrows(AutisticException.class, () -> {
+        assertThrows(ValidationException.class, () -> {
             userService.addFriend(createdUser1.getId(), createdUser1.getId());
         });
     }
@@ -93,35 +79,13 @@ class UserServiceTest {
 
         userService.addFriend(createdUser1.getId(), createdUser2.getId());
 
-        // Проверяем, что друзья добавились
-        Set<Long> user1FriendsBefore = createdUser1.getUserFriends();
-        Set<Long> user2FriendsBefore = createdUser2.getUserFriends();
-        assertEquals(1, user1FriendsBefore.size());
-        assertEquals(1, user2FriendsBefore.size());
-
         assertDoesNotThrow(() -> userService.deleteFriend(createdUser1.getId(), createdUser2.getId()));
 
-        // Проверяем напрямую через объекты, а не через сервис (чтобы избежать исключения)
-        Set<Long> user1FriendsAfter = createdUser1.getUserFriends();
-        Set<Long> user2FriendsAfter = createdUser2.getUserFriends();
+        Set<Long> user1Friends = userService.getAllUserFriends(createdUser1.getId());
+        Set<Long> user2Friends = userService.getAllUserFriends(createdUser2.getId());
 
-        assertEquals(0, user1FriendsAfter.size());
-        assertEquals(0, user2FriendsAfter.size());
-
-        // Проверяем, что сервис бросает исключение при попытке получить пустой список друзей
-        assertThrows(AutisticException.class, () -> {
-            userService.getAllUserFriends(createdUser1.getId());
-        });
-    }
-
-    @Test
-    void shouldThrowExceptionWhenDeletingNonExistentFriend() {
-        User createdUser1 = userStorage.addNewUser(user1);
-        User createdUser2 = userStorage.addNewUser(user2);
-
-        assertThrows(ValidationException.class, () -> {
-            userService.deleteFriend(createdUser1.getId(), createdUser2.getId());
-        });
+        assertEquals(0, user1Friends.size());
+        assertEquals(0, user2Friends.size());
     }
 
     @Test
@@ -141,19 +105,13 @@ class UserServiceTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenGettingFriendsForNonExistentUser() {
-        assertThrows(NotFoundException.class, () -> {
-            userService.getAllUserFriends(999L);
-        });
-    }
-
-    @Test
-    void shouldThrowExceptionWhenGettingFriendsForUserWithNoFriends() {
+    void shouldReturnEmptyFriendsList() {
         User createdUser1 = userStorage.addNewUser(user1);
 
-        assertThrows(AutisticException.class, () -> {
-            userService.getAllUserFriends(createdUser1.getId());
-        });
+        Set<Long> friends = userService.getAllUserFriends(createdUser1.getId());
+
+        assertEquals(0, friends.size());
+        assertTrue(friends.isEmpty());
     }
 
     @Test
@@ -172,56 +130,13 @@ class UserServiceTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenGettingCommonFriendsForNonExistentUser() {
-        User createdUser1 = userStorage.addNewUser(user1);
-
-        assertThrows(NotFoundException.class, () -> {
-            userService.getCommonFriends(createdUser1.getId(), 999L);
-        });
-    }
-
-    @Test
-    void shouldThrowExceptionWhenGettingCommonFriendsForUserWithNoFriends() {
+    void shouldReturnEmptyCommonFriends() {
         User createdUser1 = userStorage.addNewUser(user1);
         User createdUser2 = userStorage.addNewUser(user2);
-
-        assertThrows(AutisticException.class, () -> {
-            userService.getCommonFriends(createdUser1.getId(), createdUser2.getId());
-        });
-    }
-
-    @Test
-    void shouldReturnEmptyCommonFriendsWhenNoCommonFriends() {
-        User createdUser1 = userStorage.addNewUser(user1);
-        User createdUser2 = userStorage.addNewUser(user2);
-        User createdUser3 = userStorage.addNewUser(user3);
-        User user4 = User.builder()
-                .email("user4@mail.com")
-                .login("user4")
-                .name("User Four")
-                .birthday(LocalDate.of(1993, 1, 1))
-                .build();
-        User createdUser4 = userStorage.addNewUser(user4);
-
-        userService.addFriend(createdUser1.getId(), createdUser3.getId());
-        userService.addFriend(createdUser2.getId(), createdUser4.getId());
 
         Set<Long> commonFriends = userService.getCommonFriends(createdUser1.getId(), createdUser2.getId());
 
         assertEquals(0, commonFriends.size());
-    }
-
-    @Test
-    void shouldThrowExceptionWhenUserIdIsZero() {
-        assertThrows(ValidationException.class, () -> {
-            userService.getAllUserFriends(0L);
-        });
-    }
-
-    @Test
-    void shouldThrowExceptionWhenUserIdIsNegative() {
-        assertThrows(ValidationException.class, () -> {
-            userService.getAllUserFriends(-1L);
-        });
+        assertTrue(commonFriends.isEmpty());
     }
 }

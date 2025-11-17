@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.controllerTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.UserController;
-import ru.yandex.practicum.filmorate.exceptions.AutisticException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -327,7 +326,21 @@ class UserControllerTest {
         assertTrue(friends.contains(createdUser2.getId()));
     }
 
-    // Тесты для новых методов
+    @Test
+    void shouldReturnEmptyFriendsList() {
+        User user1 = User.builder()
+                .email("user1@mail.com")
+                .login("user1")
+                .name("User One")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
+        User createdUser1 = userController.addNewUser(user1);
+
+        Set<Long> friends = userController.getAllUserFriends(createdUser1.getId());
+        assertEquals(0, friends.size());
+        assertTrue(friends.isEmpty());
+    }
 
     @Test
     void shouldDeleteFriend() {
@@ -354,9 +367,11 @@ class UserControllerTest {
             userController.deleteFriend(createdUser1.getId(), createdUser2.getId());
         });
 
-        // Проверяем, что друзья удалились
-        assertFalse(createdUser1.getUserFriends().contains(createdUser2.getId()));
-        assertFalse(createdUser2.getUserFriends().contains(createdUser1.getId()));
+        Set<Long> user1Friends = userController.getAllUserFriends(createdUser1.getId());
+        Set<Long> user2Friends = userController.getAllUserFriends(createdUser2.getId());
+
+        assertEquals(0, user1Friends.size());
+        assertEquals(0, user2Friends.size());
     }
 
     @Test
@@ -460,6 +475,7 @@ class UserControllerTest {
         Set<Long> commonFriends = userController.getCommonFriends(createdUser1.getId(), createdUser2.getId());
 
         assertEquals(0, commonFriends.size());
+        assertTrue(commonFriends.isEmpty());
     }
 
     @Test
@@ -479,7 +495,7 @@ class UserControllerTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenGettingCommonFriendsForUserWithNoFriends() {
+    void shouldThrowExceptionWhenAddingSelfAsFriend() {
         User user1 = User.builder()
                 .email("user1@mail.com")
                 .login("user1")
@@ -487,18 +503,10 @@ class UserControllerTest {
                 .birthday(LocalDate.of(2000, 1, 1))
                 .build();
 
-        User user2 = User.builder()
-                .email("user2@mail.com")
-                .login("user2")
-                .name("User Two")
-                .birthday(LocalDate.of(2001, 1, 1))
-                .build();
-
         User createdUser1 = userController.addNewUser(user1);
-        User createdUser2 = userController.addNewUser(user2);
 
-        assertThrows(AutisticException.class, () -> {
-            userController.getCommonFriends(createdUser1.getId(), createdUser2.getId());
+        assertThrows(ValidationException.class, () -> {
+            userController.addFriend(createdUser1.getId(), createdUser1.getId());
         });
     }
 }
