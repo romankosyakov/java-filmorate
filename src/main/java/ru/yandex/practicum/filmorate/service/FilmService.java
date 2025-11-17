@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class FilmService {
+
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
 
@@ -59,17 +60,14 @@ public class FilmService {
                     // Если у обоих фильмов есть лайки, сортируем по количеству лайков (убывание)
                     if (likes1 > 0 && likes2 > 0) {
                         return Integer.compare(likes2, likes1);
-                    }
-                    // Если лайки только у первого фильма - он должен быть выше
-                    else if (likes1 > 0) {
+                    } else if (likes1 > 0) {
+                        // Если лайки только у первого фильма - он должен быть выше
                         return -1;
-                    }
-                    // Если лайки только у второго фильма - он должен быть выше
-                    else if (likes2 > 0) {
+                    } else if (likes2 > 0) {
+                        // Если лайки только у второго фильма - он должен быть выше
                         return 1;
-                    }
-                    // Если у обоих нет лайков - сортируем по названию (алфавит)
-                    else {
+                    } else {
+                        // Если у обоих нет лайков - сортируем по названию (алфавит)
                         return f1.getName().compareToIgnoreCase(f2.getName());
                     }
                 })
@@ -89,6 +87,5 @@ public class FilmService {
         if (film == null) {
             throw new NotFoundException("Фильм с ID " + filmID + " не найден.");
         }
-
     }
 }

@@ -93,7 +93,7 @@ public class UserService {
         if (firstID <= 0 || secondID <= 0) {
             throw new ValidationException("ID должен быть больше нуля");
         }
-        if (firstID == secondID){
+        if (firstID == secondID) {
             throw new AutisticException("Пользователь не может добавить себя в друзья!");
         }
         if (firstUser == null || secondUser == null) {
