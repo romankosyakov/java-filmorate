@@ -27,12 +27,10 @@ class ControllerValidationTest {
         }
     }
 
-    // Тесты для Film - создание
-
     @Test
     void shouldFailValidationWhenFilmNameIsBlankForCreation() {
         Film film = Film.builder()
-                .name("") // пустое название - должно не пройти валидацию
+                .name("")
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
@@ -40,14 +38,14 @@ class ControllerValidationTest {
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
 
-        assertFalse(violations.isEmpty(), "Фильм с пустым названием должен быть невалидным для создания");
+        assertFalse(violations.isEmpty());
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("name")));
     }
 
     @Test
     void shouldFailValidationWhenFilmNameIsNullForCreation() {
         Film film = Film.builder()
-                .name(null) // null название - должно не пройти валидацию
+                .name(null)
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
@@ -55,12 +53,12 @@ class ControllerValidationTest {
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
 
-        assertFalse(violations.isEmpty(), "Фильм с null названием должен быть невалидным для создания");
+        assertFalse(violations.isEmpty());
     }
 
     @Test
     void shouldFailValidationWhenFilmDescriptionIsTooLongForCreation() {
-        String longDescription = "A".repeat(201); // 201 символ - больше лимита
+        String longDescription = "A".repeat(201);
         Film film = Film.builder()
                 .name("Valid Film")
                 .description(longDescription)
@@ -70,13 +68,13 @@ class ControllerValidationTest {
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
 
-        assertFalse(violations.isEmpty(), "Фильм с описанием длиннее 200 символов должен быть невалидным для создания");
+        assertFalse(violations.isEmpty());
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("description")));
     }
 
     @Test
     void shouldPassValidationWhenFilmDescriptionIsExactly200CharactersForCreation() {
-        String maxLengthDescription = "A".repeat(200); // граничное значение
+        String maxLengthDescription = "A".repeat(200);
         Film film = Film.builder()
                 .name("Valid Film")
                 .description(maxLengthDescription)
@@ -86,7 +84,7 @@ class ControllerValidationTest {
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
 
-        assertTrue(violations.isEmpty(), "Фильм с описанием длиной 200 символов должен быть валидным для создания");
+        assertTrue(violations.isEmpty());
     }
 
     @Test
@@ -94,13 +92,13 @@ class ControllerValidationTest {
         Film film = Film.builder()
                 .name("Valid Film")
                 .description("Valid description")
-                .releaseDate(LocalDate.of(1895, 12, 27)) // день до минимальной даты
+                .releaseDate(LocalDate.of(1895, 12, 27))
                 .duration(120)
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
 
-        assertFalse(violations.isEmpty(), "Фильм с датой релиза раньше 28.12.1895 должен быть невалидным для создания");
+        assertFalse(violations.isEmpty());
     }
 
     @Test
@@ -108,13 +106,13 @@ class ControllerValidationTest {
         Film film = Film.builder()
                 .name("Valid Film")
                 .description("Valid description")
-                .releaseDate(LocalDate.of(1895, 12, 28)) // граничное значение
+                .releaseDate(LocalDate.of(1895, 12, 28))
                 .duration(120)
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
 
-        assertTrue(violations.isEmpty(), "Фильм с датой релиза 28.12.1895 должен быть валидным для создания");
+        assertTrue(violations.isEmpty());
     }
 
     @Test
@@ -123,12 +121,12 @@ class ControllerValidationTest {
                 .name("Valid Film")
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
-                .duration(0) // граничное значение - должно не пройти
+                .duration(0)
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
 
-        assertFalse(violations.isEmpty(), "Фильм с продолжительностью 0 должен быть невалидным для создания");
+        assertFalse(violations.isEmpty());
     }
 
     @Test
@@ -137,12 +135,12 @@ class ControllerValidationTest {
                 .name("Valid Film")
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
-                .duration(-1) // отрицательное значение
+                .duration(-1)
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
 
-        assertFalse(violations.isEmpty(), "Фильм с отрицательной продолжительностью должен быть невалидным для создания");
+        assertFalse(violations.isEmpty());
     }
 
     @Test
@@ -151,20 +149,18 @@ class ControllerValidationTest {
                 .name("Valid Film")
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
-                .duration(1) // минимальное положительное значение
+                .duration(1)
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
 
-        assertTrue(violations.isEmpty(), "Фильм с продолжительностью 1 должен быть валидным для создания");
+        assertTrue(violations.isEmpty());
     }
-
-    // Тесты для Film - обновление
 
     @Test
     void shouldFailValidationWhenFilmIdIsNullForUpdate() {
         Film film = Film.builder()
-                .id(null) // ID обязателен для обновления
+                .id(null)
                 .name("Valid Film")
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
@@ -173,14 +169,14 @@ class ControllerValidationTest {
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, UpdateValidation.class);
 
-        assertFalse(violations.isEmpty(), "Фильм с null ID должен быть невалидным для обновления");
+        assertFalse(violations.isEmpty());
     }
 
     @Test
     void shouldPassValidationWhenFilmNameIsBlankForUpdate() {
         Film film = Film.builder()
                 .id(1)
-                .name("") // пустое название допустимо для обновления
+                .name("")
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
@@ -188,95 +184,92 @@ class ControllerValidationTest {
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, UpdateValidation.class);
 
-        // Проверяем, что нет нарушений связанных с @NotBlank (только с @Size если есть)
         boolean hasNotBlankViolation = violations.stream()
                 .anyMatch(v -> v.getMessage().contains("не может быть пустым"));
-        assertFalse(hasNotBlankViolation, "Пустое название должно быть допустимо для обновления");
+        assertFalse(hasNotBlankViolation);
     }
-
-    // Тесты для User - создание
 
     @Test
     void shouldFailValidationWhenUserEmailIsBlankForCreation() {
         User user = User.builder()
-                .email("") // пустой email
+                .email("")
                 .login("validlogin")
                 .birthday(LocalDate.of(1990, 1, 1))
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
 
-        assertFalse(violations.isEmpty(), "Пользователь с пустым email должен быть невалидным для создания");
+        assertFalse(violations.isEmpty());
     }
 
     @Test
     void shouldFailValidationWhenUserEmailHasNoAtSymbolForCreation() {
         User user = User.builder()
-                .email("invalid-email.com") // email без @
+                .email("invalid-email.com")
                 .login("validlogin")
                 .birthday(LocalDate.of(1990, 1, 1))
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
 
-        assertFalse(violations.isEmpty(), "Пользователь с email без @ должен быть невалидным для создания");
+        assertFalse(violations.isEmpty());
     }
 
     @Test
     void shouldFailValidationWhenUserLoginIsBlankForCreation() {
         User user = User.builder()
                 .email("valid@email.com")
-                .login("") // пустой логин
+                .login("")
                 .birthday(LocalDate.of(1990, 1, 1))
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
 
-        assertFalse(violations.isEmpty(), "Пользователь с пустым логином должен быть невалидным для создания");
+        assertFalse(violations.isEmpty());
     }
 
     @Test
     void shouldFailValidationWhenUserLoginContainsSpacesForCreation() {
         User user = User.builder()
                 .email("valid@email.com")
-                .login("login with spaces") // логин с пробелами
+                .login("login with spaces")
                 .birthday(LocalDate.of(1990, 1, 1))
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
 
-        assertFalse(violations.isEmpty(), "Пользователь с логином содержащим пробелы должен быть невалидным для создания");
+        assertFalse(violations.isEmpty());
     }
 
     @Test
     void shouldFailValidationWhenUserLoginIsTooShortForCreation() {
         User user = User.builder()
                 .email("valid@email.com")
-                .login("abc") // 3 символа - меньше минимума
+                .login("abc")
                 .birthday(LocalDate.of(1990, 1, 1))
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
 
-        assertFalse(violations.isEmpty(), "Пользователь с логином короче 4 символов должен быть невалидным для создания");
+        assertFalse(violations.isEmpty());
     }
 
     @Test
     void shouldPassValidationWhenUserLoginIsExactlyMinLengthForCreation() {
         User user = User.builder()
                 .email("valid@email.com")
-                .login("abcd") // 4 символа - граничное значение
+                .login("abcd")
                 .birthday(LocalDate.of(1990, 1, 1))
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
 
-        assertTrue(violations.isEmpty(), "Пользователь с логином длиной 4 символа должен быть валидным для создания");
+        assertTrue(violations.isEmpty());
     }
 
     @Test
     void shouldFailValidationWhenUserLoginIsTooLongForCreation() {
-        String longLogin = "a".repeat(21); // 21 символ - больше максимума
+        String longLogin = "a".repeat(21);
         User user = User.builder()
                 .email("valid@email.com")
                 .login(longLogin)
@@ -285,12 +278,12 @@ class ControllerValidationTest {
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
 
-        assertFalse(violations.isEmpty(), "Пользователь с логином длиннее 20 символов должен быть невалидным для создания");
+        assertFalse(violations.isEmpty());
     }
 
     @Test
     void shouldPassValidationWhenUserLoginIsExactlyMaxLengthForCreation() {
-        String maxLengthLogin = "a".repeat(20); // 20 символов - граничное значение
+        String maxLengthLogin = "a".repeat(20);
         User user = User.builder()
                 .email("valid@email.com")
                 .login(maxLengthLogin)
@@ -299,7 +292,7 @@ class ControllerValidationTest {
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
 
-        assertTrue(violations.isEmpty(), "Пользователь с логином длиной 20 символов должен быть валидным для создания");
+        assertTrue(violations.isEmpty());
     }
 
     @Test
@@ -307,12 +300,12 @@ class ControllerValidationTest {
         User user = User.builder()
                 .email("valid@email.com")
                 .login("validlogin")
-                .birthday(LocalDate.now().plusDays(1)) // дата в будущем
+                .birthday(LocalDate.now().plusDays(1))
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
 
-        assertFalse(violations.isEmpty(), "Пользователь с датой рождения в будущем должен быть невалидным для создания");
+        assertFalse(violations.isEmpty());
     }
 
     @Test
@@ -320,12 +313,12 @@ class ControllerValidationTest {
         User user = User.builder()
                 .email("valid@email.com")
                 .login("validlogin")
-                .birthday(LocalDate.now()) // граничное значение
+                .birthday(LocalDate.now())
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
 
-        assertTrue(violations.isEmpty(), "Пользователь с сегодняшней датой рождения должен быть валидным для создания");
+        assertTrue(violations.isEmpty());
     }
 
     @Test
@@ -333,13 +326,13 @@ class ControllerValidationTest {
         User user = User.builder()
                 .email("valid@email.com")
                 .login("validlogin")
-                .name(null) // имя может быть null
+                .name(null)
                 .birthday(LocalDate.of(1990, 1, 1))
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
 
-        assertTrue(violations.isEmpty(), "Пользователь с null именем должен быть валидным для создания");
+        assertTrue(violations.isEmpty());
     }
 
     @Test
@@ -347,21 +340,19 @@ class ControllerValidationTest {
         User user = User.builder()
                 .email("valid@email.com")
                 .login("validlogin")
-                .name("") // имя может быть пустым
+                .name("")
                 .birthday(LocalDate.of(1990, 1, 1))
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
 
-        assertTrue(violations.isEmpty(), "Пользователь с пустым именем должен быть валидным для создания");
+        assertTrue(violations.isEmpty());
     }
-
-    // Тесты для User - обновление
 
     @Test
     void shouldFailValidationWhenUserIdIsNullForUpdate() {
         User user = User.builder()
-                .id(null) // ID обязателен для обновления
+                .id(null)
                 .email("valid@email.com")
                 .login("validlogin")
                 .birthday(LocalDate.of(1990, 1, 1))
@@ -369,24 +360,23 @@ class ControllerValidationTest {
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, UpdateValidation.class);
 
-        assertFalse(violations.isEmpty(), "Пользователь с null ID должен быть невалидным для обновления");
+        assertFalse(violations.isEmpty());
     }
 
     @Test
     void shouldPassValidationWhenUserEmailIsBlankForUpdate() {
         User user = User.builder()
                 .id(1L)
-                .email("") // пустой email допустим для обновления
+                .email("")
                 .login("validlogin")
                 .birthday(LocalDate.of(1990, 1, 1))
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, UpdateValidation.class);
 
-        // Проверяем, что нет нарушений связанных с @NotBlank
         boolean hasNotBlankViolation = violations.stream()
                 .anyMatch(v -> v.getMessage().contains("не может быть пустым"));
-        assertFalse(hasNotBlankViolation, "Пустой email должен быть допустим для обновления");
+        assertFalse(hasNotBlankViolation);
     }
 
     @Test
@@ -394,15 +384,14 @@ class ControllerValidationTest {
         User user = User.builder()
                 .id(1L)
                 .email("valid@email.com")
-                .login("") // пустой логин допустим для обновления
+                .login("")
                 .birthday(LocalDate.of(1990, 1, 1))
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, UpdateValidation.class);
 
-        // Проверяем, что нет нарушений связанных с @NotBlank
         boolean hasNotBlankViolation = violations.stream()
                 .anyMatch(v -> v.getMessage().contains("не может быть пустым"));
-        assertFalse(hasNotBlankViolation, "Пустой логин должен быть допустим для обновления");
+        assertFalse(hasNotBlankViolation);
     }
 }

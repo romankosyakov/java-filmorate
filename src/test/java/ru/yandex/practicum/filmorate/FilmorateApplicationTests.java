@@ -24,13 +24,12 @@ class FilmorateApplicationTests {
 
     @Test
     void contextLoads() {
-        assertNotNull(filmController, "FilmController должен быть в контексте Spring");
-        assertNotNull(userController, "UserController должен быть в контексте Spring");
+        assertNotNull(filmController);
+        assertNotNull(userController);
     }
 
     @Test
     void shouldCreateAndRetrieveFilm() {
-        // Интеграционный тест создания и получения фильма
         Film film = Film.builder()
                 .name("Integration Test Film")
                 .description("Film for integration testing")
@@ -39,7 +38,7 @@ class FilmorateApplicationTests {
                 .build();
 
         Film createdFilm = filmController.addNewFilm(film);
-        assertNotNull(createdFilm.getId(), "Созданный фильм должен иметь ID");
+        assertNotNull(createdFilm.getId());
 
         Film retrievedFilm = filmController.getFilm(createdFilm.getId());
         assertEquals(createdFilm.getId(), retrievedFilm.getId());
@@ -48,7 +47,6 @@ class FilmorateApplicationTests {
 
     @Test
     void shouldCreateAndRetrieveUser() {
-        // Интеграционный тест создания и получения пользователя
         User user = User.builder()
                 .email("integration@test.com")
                 .login("integration_user")
@@ -57,7 +55,7 @@ class FilmorateApplicationTests {
                 .build();
 
         User createdUser = userController.addNewUser(user);
-        assertNotNull(createdUser.getId(), "Созданный пользователь должен иметь ID");
+        assertNotNull(createdUser.getId());
 
         User retrievedUser = userController.getUser(createdUser.getId());
         assertEquals(createdUser.getId(), retrievedUser.getId());
@@ -66,7 +64,6 @@ class FilmorateApplicationTests {
 
     @Test
     void shouldUpdateFilm() {
-        // Тест обновления фильма
         Film film = Film.builder()
                 .name("Original Film")
                 .description("Original description")
@@ -92,7 +89,6 @@ class FilmorateApplicationTests {
 
     @Test
     void shouldUpdateUser() {
-        // Тест обновления пользователя
         User user = User.builder()
                 .email("original@test.com")
                 .login("original_user")
@@ -118,7 +114,6 @@ class FilmorateApplicationTests {
 
     @Test
     void shouldReturnAllFilms() {
-        // Тест получения всех фильмов
         int initialCount = filmController.getAllFilms().size();
 
         Film film1 = Film.builder()
@@ -139,12 +134,11 @@ class FilmorateApplicationTests {
         filmController.addNewFilm(film2);
 
         int finalCount = filmController.getAllFilms().size();
-        assertEquals(initialCount + 2, finalCount, "Должно быть на 2 фильма больше");
+        assertEquals(initialCount + 2, finalCount);
     }
 
     @Test
     void shouldReturnAllUsers() {
-        // Тест получения всех пользователей
         int initialCount = userController.getAllUsers().size();
 
         User user1 = User.builder()
@@ -165,12 +159,11 @@ class FilmorateApplicationTests {
         userController.addNewUser(user2);
 
         int finalCount = userController.getAllUsers().size();
-        assertEquals(initialCount + 2, finalCount, "Должно быть на 2 пользователя больше");
+        assertEquals(initialCount + 2, finalCount);
     }
 
     @Test
     void shouldUseLoginAsNameWhenNameIsEmpty() {
-        // Тест бизнес-логики: использование логина как имени при пустом имени
         User user = User.builder()
                 .email("test@mail.com")
                 .login("testuser")
@@ -179,12 +172,11 @@ class FilmorateApplicationTests {
                 .build();
 
         User createdUser = userController.addNewUser(user);
-        assertEquals("testuser", createdUser.getName(), "Должен использоваться логин как имя");
+        assertEquals("testuser", createdUser.getName());
     }
 
     @Test
     void shouldUseLoginAsNameWhenNameIsNull() {
-        // Тест бизнес-логики: использование логина как имени при null имени
         User user = User.builder()
                 .email("test@mail.com")
                 .login("testuser")
@@ -193,12 +185,11 @@ class FilmorateApplicationTests {
                 .build();
 
         User createdUser = userController.addNewUser(user);
-        assertEquals("testuser", createdUser.getName(), "Должен использоваться логин как имя");
+        assertEquals("testuser", createdUser.getName());
     }
 
     @Test
     void shouldGenerateUniqueIdsForFilms() {
-        // Тест генерации уникальных ID для фильмов
         Film film1 = Film.builder()
                 .name("Film 1")
                 .description("Description 1")
@@ -216,13 +207,12 @@ class FilmorateApplicationTests {
         Film created1 = filmController.addNewFilm(film1);
         Film created2 = filmController.addNewFilm(film2);
 
-        assertNotEquals(created1.getId(), created2.getId(), "ID фильмов должны быть разными");
-        assertTrue(created2.getId() > created1.getId(), "ID должны увеличиваться");
+        assertNotEquals(created1.getId(), created2.getId());
+        assertTrue(created2.getId() > created1.getId());
     }
 
     @Test
     void shouldGenerateUniqueIdsForUsers() {
-        // Тест генерации уникальных ID для пользователей
         User user1 = User.builder()
                 .email("user1@test.com")
                 .login("user1")
@@ -240,13 +230,12 @@ class FilmorateApplicationTests {
         User created1 = userController.addNewUser(user1);
         User created2 = userController.addNewUser(user2);
 
-        assertNotEquals(created1.getId(), created2.getId(), "ID пользователей должны быть разными");
-        assertTrue(created2.getId() > created1.getId(), "ID должны увеличиваться");
+        assertNotEquals(created1.getId(), created2.getId());
+        assertTrue(created2.getId() > created1.getId());
     }
 
     @Test
     void shouldMaintainDataConsistency() {
-        // Тест согласованности данных после операций
         Film film = Film.builder()
                 .name("Consistency Test Film")
                 .description("Test description")
@@ -261,17 +250,15 @@ class FilmorateApplicationTests {
                 .birthday(LocalDate.of(1990, 1, 1))
                 .build();
 
-        // Создаем сущности
         Film createdFilm = filmController.addNewFilm(film);
         User createdUser = userController.addNewUser(user);
 
-        // Проверяем, что они сохранились
         assertEquals(1, filmController.getAllFilms().stream()
                 .filter(f -> Objects.equals(f.getId(), createdFilm.getId()))
-                .count(), "Фильм должен быть в списке");
+                .count());
 
         assertEquals(1, userController.getAllUsers().stream()
                 .filter(u -> Objects.equals(u.getId(), createdUser.getId()))
-                .count(), "Пользователь должен быть в списке");
+                .count());
     }
 }

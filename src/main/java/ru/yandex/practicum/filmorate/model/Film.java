@@ -12,6 +12,8 @@ import ru.yandex.practicum.filmorate.validation.CreateValidation;
 import ru.yandex.practicum.filmorate.validation.UpdateValidation;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Film.
@@ -27,6 +29,8 @@ public class Film {
     @Size(max = 100, message = "Название фильма не может быть длиннее 100 символов",
             groups = {CreateValidation.class, UpdateValidation.class})
     private final String name;
+
+    private final Set<Long> filmLikes = new HashSet<>();
 
     @Size(max = 200, message = "Описание фильма не может быть длиннее 200 символов",
             groups = {CreateValidation.class, UpdateValidation.class})
