@@ -8,24 +8,18 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserControllerTest {
     private UserController userController;
-    private UserStorage userStorage;
-    private UserService userService;
 
     @BeforeEach
     void setUp() {
-        userStorage = new InMemoryUserStorage();
-        userService = new UserService(userStorage);
-        userController = new UserController(userStorage, userService);
+        userController = new UserController(new UserService(new InMemoryUserStorage()));
     }
 
     @Test
@@ -321,9 +315,9 @@ class UserControllerTest {
 
         userController.addFriend(createdUser1.getId(), createdUser2.getId());
 
-        Set<Long> friends = userController.getAllUserFriends(createdUser1.getId());
+        List<User> friends = userController.getAllUserFriends(createdUser1.getId());
         assertEquals(1, friends.size());
-        assertTrue(friends.contains(createdUser2.getId()));
+        assertTrue(friends.contains(createdUser2));
     }
 
     @Test
@@ -337,7 +331,7 @@ class UserControllerTest {
 
         User createdUser1 = userController.addNewUser(user1);
 
-        Set<Long> friends = userController.getAllUserFriends(createdUser1.getId());
+        List<User> friends = userController.getAllUserFriends(createdUser1.getId());
         assertEquals(0, friends.size());
         assertTrue(friends.isEmpty());
     }
@@ -367,8 +361,8 @@ class UserControllerTest {
             userController.deleteFriend(createdUser1.getId(), createdUser2.getId());
         });
 
-        Set<Long> user1Friends = userController.getAllUserFriends(createdUser1.getId());
-        Set<Long> user2Friends = userController.getAllUserFriends(createdUser2.getId());
+        List<User> user1Friends = userController.getAllUserFriends(createdUser1.getId());
+        List<User> user2Friends = userController.getAllUserFriends(createdUser2.getId());
 
         assertEquals(0, user1Friends.size());
         assertEquals(0, user2Friends.size());
@@ -428,10 +422,10 @@ class UserControllerTest {
         userController.addFriend(createdUser1.getId(), createdUser3.getId());
         userController.addFriend(createdUser2.getId(), createdUser3.getId());
 
-        Set<Long> commonFriends = userController.getCommonFriends(createdUser1.getId(), createdUser2.getId());
+        List<User> commonFriends = userController.getCommonFriends(createdUser1.getId(), createdUser2.getId());
 
         assertEquals(1, commonFriends.size());
-        assertTrue(commonFriends.contains(createdUser3.getId()));
+        assertTrue(commonFriends.contains(createdUser3));
     }
 
     @Test
@@ -472,7 +466,7 @@ class UserControllerTest {
         userController.addFriend(createdUser1.getId(), createdUser3.getId());
         userController.addFriend(createdUser2.getId(), createdUser4.getId());
 
-        Set<Long> commonFriends = userController.getCommonFriends(createdUser1.getId(), createdUser2.getId());
+        List<User> commonFriends = userController.getCommonFriends(createdUser1.getId(), createdUser2.getId());
 
         assertEquals(0, commonFriends.size());
         assertTrue(commonFriends.isEmpty());

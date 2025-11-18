@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -8,11 +9,9 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
+@Data
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -24,16 +23,22 @@ public class UserService {
             throw new ValidationException("Пользователь не может добавить себя в друзья!");
         }
 
-        User[] users = getTwoUsers(userID, friendID);
-        User firstUser = users[0];
-        User secondUser = users[1];
+        User user = userStorage.getUser(userID);
+        if (user == null) {
+            throw new NotFoundException("Пользователь с ID " + userID + " не найден.");
+        }
+        User friend = userStorage.getUser(friendID);
+        if (friend == null) {
+            throw new NotFoundException("Пользователь с ID " + friendID + " не найден.");
+        }
 
-        Set<Long> firstUserFriends = firstUser.getUserFriends();
-        if (firstUserFriends.contains(friendID)) {
+
+        Set<Long> firstUserFriendsIDs = user.getUserFriends();
+        if (firstUserFriendsIDs.contains(friendID)) {
             throw new ValidationException("Добавление не выполнено, пользователи уже являются друзьями!");
         } else {
-            firstUserFriends.add(friendID);
-            secondUser.getUserFriends().add(userID);
+            firstUserFriendsIDs.add(friendID);
+            friend.getUserFriends().add(userID);
             log.info("Пользователя с ID {} и {} теперь являются друзьями!", userID, friendID);
         }
     }
@@ -43,67 +48,62 @@ public class UserService {
             throw new ValidationException("Пользователь не может удалить себя из друзей!");
         }
 
-        User[] users = getTwoUsers(userID, friendID);
-        User firstUser = users[0];
-        User secondUser = users[1];
+        User user = userStorage.getUser(userID);
+        if (user == null) {
+            throw new NotFoundException("Пользователь с ID " + userID + " не найден.");
+        }
+        User friend = userStorage.getUser(friendID);
+        if (friend == null) {
+            throw new NotFoundException("Пользователь с ID " + friendID + " не найден.");
+        }
 
-        Set<Long> firstUserFriends = firstUser.getUserFriends();
-        if (!firstUserFriends.contains(friendID)) {
+        Set<Long> userFriends = user.getUserFriends();
+        if (!userFriends.contains(friendID)) {
             throw new ValidationException("Удаление не выполнено, пользователи не являются друзьями.");
         } else {
-            firstUserFriends.remove(friendID);
-            secondUser.getUserFriends().remove(userID);
+            userFriends.remove(friendID);
+            friend.getUserFriends().remove(userID);
             log.info("Пользователь с ID {} удалил из списка друзей пользователя с ID {} и теперь они " +
                     "НЕ являются друзьями!", userID, friendID);
         }
     }
 
-    public Set<Long> getAllUserFriends(Long userID) {
+    public List<User> getAllUserFriends(Long userID) {
         User user = userStorage.getUser(userID);
-        if (userID <= 0) {
-            throw new ValidationException("ID должен быть больше нуля");
-        }
+
         if (user == null) {
             throw new NotFoundException("Пользователь с ID " + userID + " не найден");
         }
 
-        // Возвращаем копию Set вместо исключения
-        return new HashSet<>(user.getUserFriends());
+        return user.getUserFriends().stream()
+                .map(userStorage::getUser)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
-    public Set<Long> getCommonFriends(Long firstUserID, Long secondUserID) {
-        User[] users = getTwoUsers(firstUserID, secondUserID);
-        User firstUser = users[0];
-        User secondUser = users[1];
+    public List<User> getCommonFriends(Long firstUserID, Long secondUserID) {
+        User firstUser = userStorage.getUser(firstUserID);
+        if (firstUser == null) {
+            throw new NotFoundException("Пользователь с ID " + firstUserID + " не найден.");
+        }
+        User secondUser = userStorage.getUser(secondUserID);
+        if (secondUser == null) {
+            throw new NotFoundException("Пользователь с ID " + secondUserID + " не найден.");
+        }
 
-        Set<Long> firstUserFriends = new HashSet<>(firstUser.getUserFriends());
-        Set<Long> secondUserFriends = new HashSet<>(secondUser.getUserFriends());
+        List<User> firstUserFriends = firstUser.getUserFriends().stream()
+                .map(userStorage::getUser)
+                .filter(Objects::nonNull)
+                .toList();
+        List<User> secondUserFriends = secondUser.getUserFriends().stream()
+                .map(userStorage::getUser)
+                .filter(Objects::nonNull)
+                .toList();
 
-        Set<Long> commonFriends = new HashSet<>(firstUserFriends);
+        List<User> commonFriends = new ArrayList<>(firstUserFriends);
         commonFriends.retainAll(secondUserFriends);
 
-        return commonFriends; // Возвращаем пустой Set если нет общих друзей
+        return commonFriends;
     }
 
-    private User[] getTwoUsers(Long firstID, Long secondID) {
-        User firstUser = userStorage.getUser(firstID);
-        User secondUser = userStorage.getUser(secondID);
-        if (firstID <= 0 || secondID <= 0) {
-            throw new ValidationException("ID должен быть больше нуля");
-        }
-        if (firstUser == null || secondUser == null) {
-            long[] usersIDs = new long[2];
-            if (firstUser == null) {
-                usersIDs[0] = firstID;
-            }
-            if (secondUser == null) {
-                usersIDs[1] = secondID;
-            }
-            long[] nullUsersIDs = Arrays.stream(usersIDs)
-                    .filter(Objects::nonNull)
-                    .toArray();
-            throw new NotFoundException("Пользователи с ID " + Arrays.toString(nullUsersIDs) + " не найдены");
-        }
-        return new User[]{firstUser, secondUser};
-    }
 }

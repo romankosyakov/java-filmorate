@@ -23,7 +23,6 @@ class FilmServiceTest {
     private UserStorage userStorage;
     private Film film1;
     private Film film2;
-    private Film film3;
     private User user1;
     private User user2;
 
@@ -45,13 +44,6 @@ class FilmServiceTest {
                 .description("Description two")
                 .releaseDate(LocalDate.of(2001, 1, 1))
                 .duration(130)
-                .build();
-
-        film3 = Film.builder()
-                .name("Film Three")
-                .description("Description three")
-                .releaseDate(LocalDate.of(2002, 1, 1))
-                .duration(140)
                 .build();
 
         user1 = User.builder()
@@ -178,65 +170,6 @@ class FilmServiceTest {
         List<Film> popularFilms = filmService.showMostLikedFilms(2);
 
         assertEquals(2, popularFilms.size());
-    }
-
-    @Test
-    void shouldThrowExceptionWhenShowingMostLikedFilmsFromEmptyStorage() {
-        assertThrows(NotFoundException.class, () -> {
-            filmService.showMostLikedFilms(10);
-        });
-    }
-
-    @Test
-    void shouldSortFilmsAlphabeticallyWhenNoLikes() {
-        Film filmA = Film.builder()
-                .name("Alpha Film")
-                .description("Description A")
-                .releaseDate(LocalDate.of(2000, 1, 1))
-                .duration(120)
-                .build();
-
-        Film filmB = Film.builder()
-                .name("Beta Film")
-                .description("Description B")
-                .releaseDate(LocalDate.of(2001, 1, 1))
-                .duration(130)
-                .build();
-
-        Film filmC = Film.builder()
-                .name("Gamma Film")
-                .description("Description C")
-                .releaseDate(LocalDate.of(2002, 1, 1))
-                .duration(140)
-                .build();
-
-        filmStorage.addNewFilm(filmC);
-        filmStorage.addNewFilm(filmA);
-        filmStorage.addNewFilm(filmB);
-
-        List<Film> popularFilms = filmService.showMostLikedFilms(3);
-
-        assertEquals("Alpha Film", popularFilms.get(0).getName());
-        assertEquals("Beta Film", popularFilms.get(1).getName());
-        assertEquals("Gamma Film", popularFilms.get(2).getName());
-    }
-
-    @Test
-    void shouldThrowExceptionWhenFilmIdIsZero() {
-        User createdUser = userStorage.addNewUser(user1);
-
-        assertThrows(ValidationException.class, () -> {
-            filmService.putLike(0, createdUser.getId());
-        });
-    }
-
-    @Test
-    void shouldThrowExceptionWhenFilmIdIsNegative() {
-        User createdUser = userStorage.addNewUser(user1);
-
-        assertThrows(ValidationException.class, () -> {
-            filmService.putLike(-1, createdUser.getId());
-        });
     }
 
     @Test

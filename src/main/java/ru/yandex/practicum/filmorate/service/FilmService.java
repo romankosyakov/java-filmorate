@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,10 +11,12 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Data
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -46,31 +49,10 @@ public class FilmService {
         }
     }
 
-    public List<Film> showMostLikedFilms(int countToShow) {
+    public List<Film> showMostLikedFilms(Integer countToShow) {
         List<Film> films = filmStorage.getAllFilms();
-        if (films.isEmpty()) {
-            throw new NotFoundException("В коллекции отсутствуют фильмы.");
-        }
-
         return films.stream()
-                .sorted((f1, f2) -> {
-                    int likes1 = f1.getFilmLikes().size();
-                    int likes2 = f2.getFilmLikes().size();
-
-                    // Если у обоих фильмов есть лайки, сортируем по количеству лайков (убывание)
-                    if (likes1 > 0 && likes2 > 0) {
-                        return Integer.compare(likes2, likes1);
-                    } else if (likes1 > 0) {
-                        // Если лайки только у первого фильма - он должен быть выше
-                        return -1;
-                    } else if (likes2 > 0) {
-                        // Если лайки только у второго фильма - он должен быть выше
-                        return 1;
-                    } else {
-                        // Если у обоих нет лайков - сортируем по названию (алфавит)
-                        return f1.getName().compareToIgnoreCase(f2.getName());
-                    }
-                })
+                .sorted(Comparator.comparingLong(Film::getRate).reversed())
                 .limit(countToShow)
                 .collect(Collectors.toList());
     }
@@ -78,9 +60,6 @@ public class FilmService {
     private void validateFilmAndUser(int filmID, long userID) {
         Film film = filmStorage.getFilm(filmID);
         User user = userStorage.getUser(userID);
-        if (filmID <= 0 || userID <= 0) {
-            throw new ValidationException("ID должен быть больше нуля");
-        }
         if (user == null) {
             throw new NotFoundException("Пользователь с ID " + userID + " не найден.");
         }

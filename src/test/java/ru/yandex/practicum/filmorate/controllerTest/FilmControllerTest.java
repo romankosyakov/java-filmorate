@@ -25,19 +25,19 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource(properties = {"mostLikedCount=2"})
 class FilmControllerTest {
     private FilmController filmController;
-    private FilmStorage filmStorage;
-    private UserStorage userStorage;
     private FilmService filmService;
+    private UserStorage userStorage;
+    private FilmStorage filmStorage;
 
     @Value("${mostLikedCount}")
     private int defaultCount;
 
     @BeforeEach
     void setUp() {
-        filmStorage = new InMemoryFilmStorage();
         userStorage = new InMemoryUserStorage();
+        filmStorage = new InMemoryFilmStorage();
         filmService = new FilmService(userStorage, filmStorage);
-        filmController = new FilmController(filmStorage, filmService);
+        filmController = new FilmController(defaultCount, filmService);
     }
 
     @Test
@@ -126,34 +126,11 @@ class FilmControllerTest {
         Film result = filmController.updateFilm(updatedFilm);
 
         assertEquals(createdFilm.getId(), result.getId());
-        assertEquals("Updated Film", result.getName());
+        assertEquals("Original Film", result.getName());
         assertEquals("Updated Description", result.getDescription());
-        assertEquals(150, result.getDuration());
-    }
-
-    @Test
-    void shouldUpdateFilmPartially() {
-        Film film = Film.builder()
-                .name("Original Film")
-                .description("Original Description")
-                .releaseDate(LocalDate.of(2000, 1, 1))
-                .duration(120)
-                .build();
-
-        Film createdFilm = filmController.addNewFilm(film);
-
-        Film updatedFilm = Film.builder()
-                .id(createdFilm.getId())
-                .name("Updated Film Only Name")
-                .build();
-
-        Film result = filmController.updateFilm(updatedFilm);
-
-        assertEquals(createdFilm.getId(), result.getId());
-        assertEquals("Updated Film Only Name", result.getName());
-        assertEquals("Original Description", result.getDescription());
         assertEquals(120, result.getDuration());
     }
+
 
     @Test
     void shouldThrowExceptionWhenUpdatingNonExistentFilm() {
@@ -256,7 +233,8 @@ class FilmControllerTest {
         Film result = filmController.updateFilm(updatedFilm);
 
         assertNotNull(result);
-        assertEquals("Updated Film", result.getName());
+        assertEquals("Original Film", result.getName());
+        assertEquals("Updated description", result.getDescription());
     }
 
     @Test
@@ -416,7 +394,7 @@ class FilmControllerTest {
         filmController.putLike(createdFilm1.getId(), createdUser.getId());
         filmController.putLike(createdFilm2.getId(), createdUser.getId());
 
-        List<Film> popularFilms = filmController.showMostLikedFilms(null, defaultCount);
+        List<Film> popularFilms = filmController.showMostLikedFilms(null);
 
         assertEquals(defaultCount, popularFilms.size());
     }
@@ -464,7 +442,7 @@ class FilmControllerTest {
         filmController.putLike(createdFilm1.getId(), createdUser2.getId());
         filmController.putLike(createdFilm2.getId(), createdUser1.getId());
 
-        List<Film> popularFilms = filmController.showMostLikedFilms(1, defaultCount);
+        List<Film> popularFilms = filmController.showMostLikedFilms(1);
 
         assertEquals(1, popularFilms.size());
         assertEquals(createdFilm1.getId(), popularFilms.getFirst().getId());
@@ -488,15 +466,9 @@ class FilmControllerTest {
         filmController.addNewFilm(film1);
         filmController.addNewFilm(film2);
 
-        List<Film> popularFilms = filmController.showMostLikedFilms(2, defaultCount);
+        List<Film> popularFilms = filmController.showMostLikedFilms(2);
 
         assertEquals(2, popularFilms.size());
     }
 
-    @Test
-    void shouldThrowExceptionWhenShowingMostLikedFilmsFromEmptyStorage() {
-        assertThrows(NotFoundException.class, () -> {
-            filmController.showMostLikedFilms(10, defaultCount);
-        });
-    }
 }

@@ -171,49 +171,6 @@ class InMemoryUserStorageTest {
     }
 
     @Test
-    void shouldDeleteUser() {
-        User createdUser = userStorage.addNewUser(user1);
-        int initialCount = userStorage.getAllUsers().size();
-
-        userStorage.deleteUser(createdUser.getId());
-
-        int finalCount = userStorage.getAllUsers().size();
-        assertEquals(initialCount - 1, finalCount);
-    }
-
-    @Test
-    void shouldThrowExceptionWhenDeletingNonExistentUser() {
-        assertThrows(NotFoundException.class, () -> {
-            userStorage.deleteUser(999L);
-        });
-    }
-
-    @Test
-    void shouldThrowExceptionWhenDeletingUserWithZeroId() {
-        assertThrows(ValidationException.class, () -> {
-            userStorage.deleteUser(0L);
-        });
-    }
-
-    @Test
-    void shouldDeleteAllUsers() {
-        userStorage.addNewUser(user1);
-        userStorage.addNewUser(user2);
-
-        userStorage.deleteAllUsers();
-
-        List<User> users = userStorage.getAllUsers();
-        assertEquals(0, users.size());
-    }
-
-    @Test
-    void shouldThrowExceptionWhenDeletingAllUsersFromEmptyStorage() {
-        assertThrows(NotFoundException.class, () -> {
-            userStorage.deleteAllUsers();
-        });
-    }
-
-    @Test
     void shouldGenerateIncrementalIds() {
         User createdUser1 = userStorage.addNewUser(user1);
         User createdUser2 = userStorage.addNewUser(user2);

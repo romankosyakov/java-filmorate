@@ -30,8 +30,6 @@ public class Film {
             groups = {CreateValidation.class, UpdateValidation.class})
     private final String name;
 
-    private final Set<Long> filmLikes = new HashSet<>();
-
     @Size(max = 200, message = "Описание фильма не может быть длиннее 200 символов",
             groups = {CreateValidation.class, UpdateValidation.class})
     private String description;
@@ -43,4 +41,10 @@ public class Film {
     @Positive(message = "Продолжительность фильма должна быть положительным числом",
             groups = {CreateValidation.class, UpdateValidation.class})
     private final Integer duration;
+
+    private final Set<Long> filmLikes = new HashSet<>();
+
+    public int getRate() {
+        return filmLikes.size();
+    }
 }

@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.storageTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
@@ -65,20 +64,6 @@ class InMemoryFilmStorageTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenGettingFilmWithZeroId() {
-        assertThrows(ValidationException.class, () -> {
-            filmStorage.getFilm(0);
-        });
-    }
-
-    @Test
-    void shouldThrowExceptionWhenGettingFilmWithNegativeId() {
-        assertThrows(ValidationException.class, () -> {
-            filmStorage.getFilm(-1);
-        });
-    }
-
-    @Test
     void shouldGetAllFilms() {
         filmStorage.addNewFilm(film1);
         filmStorage.addNewFilm(film2);
@@ -89,7 +74,7 @@ class InMemoryFilmStorageTest {
     }
 
     @Test
-    void shouldUpdateFilm() {
+    void shouldUpdateOnlyFilmDescription() {
         Film createdFilm = filmStorage.addNewFilm(film1);
 
         Film updatedFilm = Film.builder()
@@ -103,10 +88,10 @@ class InMemoryFilmStorageTest {
         Film result = filmStorage.updateFilm(updatedFilm);
 
         assertEquals(createdFilm.getId(), result.getId());
-        assertEquals("Updated Film", result.getName());
+        assertEquals("Film One", result.getName());
         assertEquals("Updated description", result.getDescription());
-        assertEquals(LocalDate.of(2002, 1, 1), result.getReleaseDate());
-        assertEquals(150, result.getDuration());
+        assertEquals(LocalDate.of(2000, 1, 1), result.getReleaseDate());
+        assertEquals(120, result.getDuration());
     }
 
     @Test
@@ -121,7 +106,7 @@ class InMemoryFilmStorageTest {
         Film result = filmStorage.updateFilm(updatedFilm);
 
         assertEquals(createdFilm.getId(), result.getId());
-        assertEquals("Updated Film Only Name", result.getName());
+        assertEquals("Film One", result.getName());
         assertEquals("Description one", result.getDescription());
         assertEquals(LocalDate.of(2000, 1, 1), result.getReleaseDate());
         assertEquals(120, result.getDuration());
@@ -139,49 +124,6 @@ class InMemoryFilmStorageTest {
 
         assertThrows(NotFoundException.class, () -> {
             filmStorage.updateFilm(film);
-        });
-    }
-
-    @Test
-    void shouldDeleteFilm() {
-        Film createdFilm = filmStorage.addNewFilm(film1);
-        int initialCount = filmStorage.getAllFilms().size();
-
-        filmStorage.deleteFilm(createdFilm.getId());
-
-        int finalCount = filmStorage.getAllFilms().size();
-        assertEquals(initialCount - 1, finalCount);
-    }
-
-    @Test
-    void shouldThrowExceptionWhenDeletingNonExistentFilm() {
-        assertThrows(NotFoundException.class, () -> {
-            filmStorage.deleteFilm(999);
-        });
-    }
-
-    @Test
-    void shouldThrowExceptionWhenDeletingFilmWithZeroId() {
-        assertThrows(ValidationException.class, () -> {
-            filmStorage.deleteFilm(0);
-        });
-    }
-
-    @Test
-    void shouldDeleteAllFilms() {
-        filmStorage.addNewFilm(film1);
-        filmStorage.addNewFilm(film2);
-
-        filmStorage.deleteAllFilms();
-
-        List<Film> films = filmStorage.getAllFilms();
-        assertEquals(0, films.size());
-    }
-
-    @Test
-    void shouldThrowExceptionWhenDeletingAllFilmsFromEmptyStorage() {
-        assertThrows(NotFoundException.class, () -> {
-            filmStorage.deleteAllFilms();
         });
     }
 

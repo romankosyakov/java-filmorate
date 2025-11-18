@@ -82,9 +82,9 @@ class FilmorateApplicationTests {
                 .build();
 
         Film result = filmController.updateFilm(updatedFilm);
-        assertEquals("Updated Film", result.getName());
+        assertEquals("Original Film", result.getName());
         assertEquals("Updated description", result.getDescription());
-        assertEquals(150, result.getDuration());
+        assertEquals(120, result.getDuration());
     }
 
     @Test

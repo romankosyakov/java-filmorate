@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -54,13 +54,13 @@ class UserServiceTest {
 
         assertDoesNotThrow(() -> userService.addFriend(createdUser1.getId(), createdUser2.getId()));
 
-        Set<Long> user1Friends = userService.getAllUserFriends(createdUser1.getId());
-        Set<Long> user2Friends = userService.getAllUserFriends(createdUser2.getId());
+        List<User> user1Friends = userService.getAllUserFriends(createdUser1.getId());
+        List<User> user2Friends = userService.getAllUserFriends(createdUser2.getId());
 
         assertEquals(1, user1Friends.size());
         assertEquals(1, user2Friends.size());
-        assertTrue(user1Friends.contains(createdUser2.getId()));
-        assertTrue(user2Friends.contains(createdUser1.getId()));
+        assertTrue(user1Friends.contains(createdUser2));
+        assertTrue(user2Friends.contains(createdUser1));
     }
 
     @Test
@@ -81,8 +81,8 @@ class UserServiceTest {
 
         assertDoesNotThrow(() -> userService.deleteFriend(createdUser1.getId(), createdUser2.getId()));
 
-        Set<Long> user1Friends = userService.getAllUserFriends(createdUser1.getId());
-        Set<Long> user2Friends = userService.getAllUserFriends(createdUser2.getId());
+        List<User> user1Friends = userService.getAllUserFriends(createdUser1.getId());
+        List<User> user2Friends = userService.getAllUserFriends(createdUser2.getId());
 
         assertEquals(0, user1Friends.size());
         assertEquals(0, user2Friends.size());
@@ -97,18 +97,18 @@ class UserServiceTest {
         userService.addFriend(createdUser1.getId(), createdUser2.getId());
         userService.addFriend(createdUser1.getId(), createdUser3.getId());
 
-        Set<Long> friends = userService.getAllUserFriends(createdUser1.getId());
+        List<User> friends = userService.getAllUserFriends(createdUser1.getId());
 
         assertEquals(2, friends.size());
-        assertTrue(friends.contains(createdUser2.getId()));
-        assertTrue(friends.contains(createdUser3.getId()));
+        assertTrue(friends.contains(createdUser2));
+        assertTrue(friends.contains(createdUser3));
     }
 
     @Test
     void shouldReturnEmptyFriendsList() {
         User createdUser1 = userStorage.addNewUser(user1);
 
-        Set<Long> friends = userService.getAllUserFriends(createdUser1.getId());
+        List<User> friends = userService.getAllUserFriends(createdUser1.getId());
 
         assertEquals(0, friends.size());
         assertTrue(friends.isEmpty());
@@ -123,10 +123,10 @@ class UserServiceTest {
         userService.addFriend(createdUser1.getId(), createdUser3.getId());
         userService.addFriend(createdUser2.getId(), createdUser3.getId());
 
-        Set<Long> commonFriends = userService.getCommonFriends(createdUser1.getId(), createdUser2.getId());
+        List<User> commonFriends = userService.getCommonFriends(createdUser1.getId(), createdUser2.getId());
 
         assertEquals(1, commonFriends.size());
-        assertTrue(commonFriends.contains(createdUser3.getId()));
+        assertTrue(commonFriends.contains(createdUser3));
     }
 
     @Test
@@ -134,7 +134,7 @@ class UserServiceTest {
         User createdUser1 = userStorage.addNewUser(user1);
         User createdUser2 = userStorage.addNewUser(user2);
 
-        Set<Long> commonFriends = userService.getCommonFriends(createdUser1.getId(), createdUser2.getId());
+        List<User> commonFriends = userService.getCommonFriends(createdUser1.getId(), createdUser2.getId());
 
         assertEquals(0, commonFriends.size());
         assertTrue(commonFriends.isEmpty());
