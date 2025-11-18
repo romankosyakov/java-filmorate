@@ -74,7 +74,7 @@ class InMemoryFilmStorageTest {
     }
 
     @Test
-    void shouldUpdateOnlyFilmDescription() {
+    void shouldUpdateFilm() {
         Film createdFilm = filmStorage.addNewFilm(film1);
 
         Film updatedFilm = Film.builder()
@@ -88,10 +88,10 @@ class InMemoryFilmStorageTest {
         Film result = filmStorage.updateFilm(updatedFilm);
 
         assertEquals(createdFilm.getId(), result.getId());
-        assertEquals("Film One", result.getName());
+        assertEquals("Updated Film", result.getName());
         assertEquals("Updated description", result.getDescription());
-        assertEquals(LocalDate.of(2000, 1, 1), result.getReleaseDate());
-        assertEquals(120, result.getDuration());
+        assertEquals(LocalDate.of(2002, 1, 1), result.getReleaseDate());
+        assertEquals(150, result.getDuration());
     }
 
     @Test
@@ -106,7 +106,7 @@ class InMemoryFilmStorageTest {
         Film result = filmStorage.updateFilm(updatedFilm);
 
         assertEquals(createdFilm.getId(), result.getId());
-        assertEquals("Film One", result.getName());
+        assertEquals("Updated Film Only Name", result.getName());
         assertEquals("Description one", result.getDescription());
         assertEquals(LocalDate.of(2000, 1, 1), result.getReleaseDate());
         assertEquals(120, result.getDuration());

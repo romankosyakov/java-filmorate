@@ -58,14 +58,18 @@ public class UserService {
         }
 
         Set<Long> userFriends = user.getUserFriends();
+        Set<Long> friendFriends = friend.getUserFriends();
+
         if (!userFriends.contains(friendID)) {
-            throw new ValidationException("Удаление не выполнено, пользователи не являются друзьями.");
-        } else {
-            userFriends.remove(friendID);
-            friend.getUserFriends().remove(userID);
-            log.info("Пользователь с ID {} удалил из списка друзей пользователя с ID {} и теперь они " +
-                    "НЕ являются друзьями!", userID, friendID);
+            log.info("Пользователь {} не был в друзьях у {}", friendID, userID);
+            return; // успешное выполнение без исключения
         }
+
+        userFriends.remove(friendID);
+        friendFriends.remove(userID);
+
+        log.info("Пользователь с ID {} удалил из списка друзей пользователя с ID {} и теперь они " +
+                "НЕ являются друзьями!", userID, friendID);
     }
 
     public List<User> getAllUserFriends(Long userID) {

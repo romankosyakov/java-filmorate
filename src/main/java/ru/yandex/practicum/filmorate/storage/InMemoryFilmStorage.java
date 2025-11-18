@@ -49,6 +49,15 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (filmUpdate.getDescription() != null) {
             existingFilm.setDescription(filmUpdate.getDescription());
         }
+        if (filmUpdate.getDuration() != null) {
+            existingFilm.setDuration(filmUpdate.getDuration());
+        }
+        if (filmUpdate.getName() != null) {
+            existingFilm.setName(filmUpdate.getName());
+        }
+        if (filmUpdate.getReleaseDate() != null) {
+            existingFilm.setReleaseDate(filmUpdate.getReleaseDate());
+        }
 
         log.info("Обновлен фильм: '{}' (ID: {})", existingFilm.getName(), existingFilm.getId());
         return existingFilm;

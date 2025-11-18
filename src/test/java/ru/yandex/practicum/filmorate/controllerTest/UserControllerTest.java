@@ -369,7 +369,7 @@ class UserControllerTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenDeletingNonExistentFriend() {
+    void shouldDeleteNonExistentFriend() {
         User user1 = User.builder()
                 .email("user1@mail.com")
                 .login("user1")
@@ -387,9 +387,7 @@ class UserControllerTest {
         User createdUser1 = userController.addNewUser(user1);
         User createdUser2 = userController.addNewUser(user2);
 
-        assertThrows(ValidationException.class, () -> {
-            userController.deleteFriend(createdUser1.getId(), createdUser2.getId());
-        });
+        assertDoesNotThrow(() -> userController.deleteFriend(createdUser1.getId(), createdUser2.getId()));
     }
 
     @Test
