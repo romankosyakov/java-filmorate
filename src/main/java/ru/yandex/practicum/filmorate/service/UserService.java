@@ -95,19 +95,16 @@ public class UserService {
             throw new NotFoundException("Пользователь с ID " + secondUserID + " не найден.");
         }
 
-        List<User> firstUserFriends = firstUser.getUserFriends().stream()
+        Set<Long> firstUserFriendsIDs = firstUser.getUserFriends();
+        Set<Long> secondUserFriendsIDs = secondUser.getUserFriends();
+
+        Set<Long> commonFriendsIDs = new HashSet<>(firstUserFriendsIDs);
+        commonFriendsIDs.retainAll(secondUserFriendsIDs);
+
+        return commonFriendsIDs.stream()
                 .map(userStorage::getUser)
                 .filter(Objects::nonNull)
                 .toList();
-        List<User> secondUserFriends = secondUser.getUserFriends().stream()
-                .map(userStorage::getUser)
-                .filter(Objects::nonNull)
-                .toList();
-
-        List<User> commonFriends = new ArrayList<>(firstUserFriends);
-        commonFriends.retainAll(secondUserFriends);
-
-        return commonFriends;
     }
 
 }
