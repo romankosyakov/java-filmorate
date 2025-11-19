@@ -8,6 +8,8 @@ import ru.yandex.practicum.filmorate.validation.CreateValidation;
 import ru.yandex.practicum.filmorate.validation.UpdateValidation;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Builder
@@ -16,6 +18,7 @@ public class User {
     public static final String LOGIN_PATTERN = "^\\w+$";
     public static final int LOGIN_MIN_LENGTH = 4;
     public static final int LOGIN_MAX_LENGTH = 20;
+    private final Set<Long> userFriends = new HashSet<>();
 
     @NotNull(groups = UpdateValidation.class, message = "ID пользователя обязателен для обновления")
     private final Long id;

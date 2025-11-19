@@ -1,0 +1,6 @@
+mostLikedCount: 10
+logging:
+  level:
+    org:
+      zalando:
+        logbook: TRACE

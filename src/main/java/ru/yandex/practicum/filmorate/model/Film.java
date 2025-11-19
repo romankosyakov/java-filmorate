@@ -12,6 +12,8 @@ import ru.yandex.practicum.filmorate.validation.CreateValidation;
 import ru.yandex.practicum.filmorate.validation.UpdateValidation;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Film.
@@ -26,7 +28,7 @@ public class Film {
     @NotBlank(message = "Название фильма не может быть пустым", groups = CreateValidation.class)
     @Size(max = 100, message = "Название фильма не может быть длиннее 100 символов",
             groups = {CreateValidation.class, UpdateValidation.class})
-    private final String name;
+    private String name;
 
     @Size(max = 200, message = "Описание фильма не может быть длиннее 200 символов",
             groups = {CreateValidation.class, UpdateValidation.class})
@@ -34,9 +36,15 @@ public class Film {
 
     @NotNull(message = "Дата релиза обязательна", groups = CreateValidation.class)
     @MinReleaseDate(groups = {CreateValidation.class, UpdateValidation.class})
-    private final LocalDate releaseDate;
+    private LocalDate releaseDate;
 
     @Positive(message = "Продолжительность фильма должна быть положительным числом",
             groups = {CreateValidation.class, UpdateValidation.class})
-    private final Integer duration;
+    private Integer duration;
+
+    private final Set<Long> filmLikes = new HashSet<>();
+
+    public int getRate() {
+        return filmLikes.size();
+    }
 }

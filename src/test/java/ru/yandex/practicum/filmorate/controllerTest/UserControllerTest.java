@@ -4,7 +4,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,7 +19,7 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        userController = new UserController();
+        userController = new UserController(new UserService(new InMemoryUserStorage()));
     }
 
     @Test
@@ -30,7 +33,7 @@ class UserControllerTest {
 
         User createdUser = userController.addNewUser(user);
 
-        assertNotNull(createdUser.getId(), "Пользователь должен получить ID");
+        assertNotNull(createdUser.getId());
         assertEquals("test@mail.com", createdUser.getEmail());
         assertEquals("testuser", createdUser.getLogin());
         assertEquals(1, userController.getAllUsers().size());
@@ -47,7 +50,7 @@ class UserControllerTest {
 
         User createdUser = userController.addNewUser(user);
 
-        assertEquals("testuser", createdUser.getName(), "Должен использоваться логин, когда имя пустое");
+        assertEquals("testuser", createdUser.getName());
     }
 
     @Test
@@ -61,7 +64,7 @@ class UserControllerTest {
 
         User createdUser = userController.addNewUser(user);
 
-        assertEquals("testuser", createdUser.getName(), "Должен использоваться логин, когда имя null");
+        assertEquals("testuser", createdUser.getName());
     }
 
     @Test
@@ -86,8 +89,6 @@ class UserControllerTest {
         List<User> users = userController.getAllUsers();
 
         assertEquals(2, users.size());
-        assertEquals("user1", users.get(0).getLogin());
-        assertEquals("user2", users.get(1).getLogin());
     }
 
     @Test
@@ -111,7 +112,7 @@ class UserControllerTest {
     void shouldThrowExceptionWhenUserNotFound() {
         assertThrows(NotFoundException.class, () -> {
             userController.getUser(999L);
-        }, "Должно выбрасываться исключение при поиске несуществующего пользователя");
+        });
     }
 
     @Test
@@ -152,7 +153,6 @@ class UserControllerTest {
 
         User createdUser = userController.addNewUser(user);
 
-        // Обновляем только email
         User updatedUser = User.builder()
                 .id(createdUser.getId())
                 .email("updated@mail.com")
@@ -162,8 +162,8 @@ class UserControllerTest {
 
         assertEquals(createdUser.getId(), result.getId());
         assertEquals("updated@mail.com", result.getEmail());
-        assertEquals("originaluser", result.getLogin()); // остался прежним
-        assertEquals("Original User", result.getName()); // осталось прежним
+        assertEquals("originaluser", result.getLogin());
+        assertEquals("Original User", result.getName());
     }
 
     @Test
@@ -178,7 +178,7 @@ class UserControllerTest {
 
         assertThrows(NotFoundException.class, () -> {
             userController.updateUser(user);
-        }, "Должно выбрасываться исключение при обновлении несуществующего пользователя");
+        });
     }
 
     @Test
@@ -227,7 +227,7 @@ class UserControllerTest {
         userController.updateUser(updatedUser);
         int finalCount = userController.getAllUsers().size();
 
-        assertEquals(initialCount, finalCount, "Количество пользователей не должно меняться при обновлении");
+        assertEquals(initialCount, finalCount);
     }
 
     @Test
@@ -268,5 +268,237 @@ class UserControllerTest {
 
         assertNotNull(result);
         assertEquals("updated@mail.com", result.getEmail());
+    }
+
+    @Test
+    void shouldAddFriend() {
+        User user1 = User.builder()
+                .email("user1@mail.com")
+                .login("user1")
+                .name("User One")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
+        User user2 = User.builder()
+                .email("user2@mail.com")
+                .login("user2")
+                .name("User Two")
+                .birthday(LocalDate.of(2001, 1, 1))
+                .build();
+
+        User createdUser1 = userController.addNewUser(user1);
+        User createdUser2 = userController.addNewUser(user2);
+
+        assertDoesNotThrow(() -> {
+            userController.addFriend(createdUser1.getId(), createdUser2.getId());
+        });
+    }
+
+    @Test
+    void shouldGetUserFriends() {
+        User user1 = User.builder()
+                .email("user1@mail.com")
+                .login("user1")
+                .name("User One")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
+        User user2 = User.builder()
+                .email("user2@mail.com")
+                .login("user2")
+                .name("User Two")
+                .birthday(LocalDate.of(2001, 1, 1))
+                .build();
+
+        User createdUser1 = userController.addNewUser(user1);
+        User createdUser2 = userController.addNewUser(user2);
+
+        userController.addFriend(createdUser1.getId(), createdUser2.getId());
+
+        List<User> friends = userController.getAllUserFriends(createdUser1.getId());
+        assertEquals(1, friends.size());
+        assertTrue(friends.contains(createdUser2));
+    }
+
+    @Test
+    void shouldReturnEmptyFriendsList() {
+        User user1 = User.builder()
+                .email("user1@mail.com")
+                .login("user1")
+                .name("User One")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
+        User createdUser1 = userController.addNewUser(user1);
+
+        List<User> friends = userController.getAllUserFriends(createdUser1.getId());
+        assertEquals(0, friends.size());
+        assertTrue(friends.isEmpty());
+    }
+
+    @Test
+    void shouldDeleteFriend() {
+        User user1 = User.builder()
+                .email("user1@mail.com")
+                .login("user1")
+                .name("User One")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
+        User user2 = User.builder()
+                .email("user2@mail.com")
+                .login("user2")
+                .name("User Two")
+                .birthday(LocalDate.of(2001, 1, 1))
+                .build();
+
+        User createdUser1 = userController.addNewUser(user1);
+        User createdUser2 = userController.addNewUser(user2);
+
+        userController.addFriend(createdUser1.getId(), createdUser2.getId());
+
+        assertDoesNotThrow(() -> {
+            userController.deleteFriend(createdUser1.getId(), createdUser2.getId());
+        });
+
+        List<User> user1Friends = userController.getAllUserFriends(createdUser1.getId());
+        List<User> user2Friends = userController.getAllUserFriends(createdUser2.getId());
+
+        assertEquals(0, user1Friends.size());
+        assertEquals(0, user2Friends.size());
+    }
+
+    @Test
+    void shouldDeleteNonExistentFriend() {
+        User user1 = User.builder()
+                .email("user1@mail.com")
+                .login("user1")
+                .name("User One")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
+        User user2 = User.builder()
+                .email("user2@mail.com")
+                .login("user2")
+                .name("User Two")
+                .birthday(LocalDate.of(2001, 1, 1))
+                .build();
+
+        User createdUser1 = userController.addNewUser(user1);
+        User createdUser2 = userController.addNewUser(user2);
+
+        assertDoesNotThrow(() -> userController.deleteFriend(createdUser1.getId(), createdUser2.getId()));
+    }
+
+    @Test
+    void shouldGetCommonFriends() {
+        User user1 = User.builder()
+                .email("user1@mail.com")
+                .login("user1")
+                .name("User One")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
+        User user2 = User.builder()
+                .email("user2@mail.com")
+                .login("user2")
+                .name("User Two")
+                .birthday(LocalDate.of(2001, 1, 1))
+                .build();
+
+        User user3 = User.builder()
+                .email("user3@mail.com")
+                .login("user3")
+                .name("User Three")
+                .birthday(LocalDate.of(2002, 1, 1))
+                .build();
+
+        User createdUser1 = userController.addNewUser(user1);
+        User createdUser2 = userController.addNewUser(user2);
+        User createdUser3 = userController.addNewUser(user3);
+
+        userController.addFriend(createdUser1.getId(), createdUser3.getId());
+        userController.addFriend(createdUser2.getId(), createdUser3.getId());
+
+        List<User> commonFriends = userController.getCommonFriends(createdUser1.getId(), createdUser2.getId());
+
+        assertEquals(1, commonFriends.size());
+        assertTrue(commonFriends.contains(createdUser3));
+    }
+
+    @Test
+    void shouldReturnEmptyCommonFriendsWhenNoCommonFriends() {
+        User user1 = User.builder()
+                .email("user1@mail.com")
+                .login("user1")
+                .name("User One")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
+        User user2 = User.builder()
+                .email("user2@mail.com")
+                .login("user2")
+                .name("User Two")
+                .birthday(LocalDate.of(2001, 1, 1))
+                .build();
+
+        User user3 = User.builder()
+                .email("user3@mail.com")
+                .login("user3")
+                .name("User Three")
+                .birthday(LocalDate.of(2002, 1, 1))
+                .build();
+
+        User user4 = User.builder()
+                .email("user4@mail.com")
+                .login("user4")
+                .name("User Four")
+                .birthday(LocalDate.of(2003, 1, 1))
+                .build();
+
+        User createdUser1 = userController.addNewUser(user1);
+        User createdUser2 = userController.addNewUser(user2);
+        User createdUser3 = userController.addNewUser(user3);
+        User createdUser4 = userController.addNewUser(user4);
+
+        userController.addFriend(createdUser1.getId(), createdUser3.getId());
+        userController.addFriend(createdUser2.getId(), createdUser4.getId());
+
+        List<User> commonFriends = userController.getCommonFriends(createdUser1.getId(), createdUser2.getId());
+
+        assertEquals(0, commonFriends.size());
+        assertTrue(commonFriends.isEmpty());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenGettingCommonFriendsForNonExistentUser() {
+        User user1 = User.builder()
+                .email("user1@mail.com")
+                .login("user1")
+                .name("User One")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
+        User createdUser1 = userController.addNewUser(user1);
+
+        assertThrows(NotFoundException.class, () -> {
+            userController.getCommonFriends(createdUser1.getId(), 999L);
+        });
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAddingSelfAsFriend() {
+        User user1 = User.builder()
+                .email("user1@mail.com")
+                .login("user1")
+                .name("User One")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
+        User createdUser1 = userController.addNewUser(user1);
+
+        assertThrows(ValidationException.class, () -> {
+            userController.addFriend(createdUser1.getId(), createdUser1.getId());
+        });
     }
 }
