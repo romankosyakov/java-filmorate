@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="filmorate v1.0" id="Project_e7dc45" database="PostgreSQL" >
+	<comment><![CDATA[База данных приложения filmorate]]></comment>
+	<schema name="filmorate" >
+		<table name="film_genres" >
+			<comment><![CDATA[Жанры фильма]]></comment>
+			<column name="film_id" type="integer" jt="4" mandatory="y" />
+			<column name="genre_id" type="integer" jt="4" mandatory="y" >
+				<comment><![CDATA[Идентификатор жанра]]></comment>
+			</column>
+			<index name="pk_film_genres" unique="PRIMARY_KEY" >
+				<comment>PK</comment>
+				<column name="film_id" />
+				<column name="genre_id" />
+			</index>
+			<fk name="fk_film_genres_films" to_schema="filmorate" to_table="films" >
+				<fk_column name="film_id" pk="id" />
+			</fk>
+			<fk name="fk_film_genres_genres" to_schema="filmorate" to_table="genres" >
+				<fk_column name="genre_id" pk="id" />
+			</fk>
+		</table>
+		<table name="films" >
+			<comment><![CDATA[Фильмы]]></comment>
+			<column name="id" type="integer" jt="4" mandatory="y" >
+				<comment><![CDATA[Идентификатор]]></comment>
+			</column>
+			<column name="name" type="varchar" length="100" jt="12" mandatory="y" >
+				<comment><![CDATA[Наименование фильма]]></comment>
+			</column>
+			<column name="description" type="varchar" length="200" jt="12" >
+				<comment><![CDATA[Описание фильма]]></comment>
+			</column>
+			<column name="release_date" type="date" jt="91" mandatory="y" >
+				<comment><![CDATA[Дата релиза]]></comment>
+			</column>
+			<column name="duration" type="integer" jt="4" mandatory="y" >
+				<comment><![CDATA[Продолжительность фильма]]></comment>
+			</column>
+			<column name="rating_id" type="integer" jt="4" mandatory="y" >
+				<comment><![CDATA[Идентификатор рейтинга]]></comment>
+			</column>
+			<index name="unq_films_id" unique="UNIQUE" >
+				<column name="id" />
+			</index>
+			<fk name="fk_films_ratings" to_schema="filmorate" to_table="ratings" >
+				<fk_column name="rating_id" pk="id" />
+			</fk>
+		</table>
+		<table name="friendships" >
+			<comment><![CDATA[Друзья пользователя]]></comment>
+			<column name="user_id" type="bigint" jt="-5" mandatory="y" >
+				<comment><![CDATA[Идентификатор пользователя]]></comment>
+			</column>
+			<column name="friend_id" type="bigint" jt="-5" mandatory="y" >
+				<comment><![CDATA[Идентификатор друга]]></comment>
+			</column>
+			<column name="status" type="varchar" length="20" jt="12" mandatory="y" >
+				<comment><![CDATA[Статус дружбы]]></comment>
+			</column>
+			<index name="pk_friendships" unique="PRIMARY_KEY" >
+				<comment>PK</comment>
+				<column name="user_id" />
+				<column name="friend_id" />
+			</index>
+			<fk name="fk_friendships_on_users" to_schema="filmorate" to_table="users" >
+				<fk_column name="friend_id" pk="id" />
+			</fk>
+			<fk name="fk_friendships_users" to_schema="filmorate" to_table="users" >
+				<fk_column name="user_id" pk="id" />
+			</fk>
+		</table>
+		<table name="genres" >
+			<comment><![CDATA[Жанры]]></comment>
+			<column name="id" type="integer" jt="4" mandatory="y" >
+				<comment><![CDATA[Идентификатор]]></comment>
+			</column>
+			<column name="name" type="varchar" length="50" jt="12" mandatory="y" >
+				<comment><![CDATA[Наименование жанра]]></comment>
+			</column>
+			<index name="pk_genres_id" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+		</table>
+		<table name="likes" >
+			<comment><![CDATA[Лайки пользователей]]></comment>
+			<column name="film_id" type="integer" jt="4" mandatory="y" >
+				<comment><![CDATA[Идентификатор фильма]]></comment>
+			</column>
+			<column name="user_id" type="bigint" jt="-5" mandatory="y" >
+				<comment><![CDATA[Идентификатор пользователя]]></comment>
+			</column>
+			<column name="created" type="timestamp" jt="93" mandatory="y" >
+				<defo>current_timestamp</defo>
+				<comment><![CDATA[Технические дата и время создания записи]]></comment>
+			</column>
+			<index name="pk_likes" unique="PRIMARY_KEY" >
+				<comment>PK</comment>
+				<column name="film_id" />
+				<column name="user_id" />
+			</index>
+			<fk name="fk_likes_users" to_schema="filmorate" to_table="users" >
+				<fk_column name="user_id" pk="id" />
+			</fk>
+			<fk name="fk_likes_films" to_schema="filmorate" to_table="films" >
+				<fk_column name="film_id" pk="id" />
+			</fk>
+		</table>
+		<table name="ratings" >
+			<comment><![CDATA[MPA рейтинги]]></comment>
+			<column name="id" type="integer" jt="4" mandatory="y" >
+				<comment><![CDATA[Идентификатор рейтинга]]></comment>
+			</column>
+			<column name="name" type="varchar" length="10" jt="12" mandatory="y" >
+				<comment><![CDATA[Наименование рейтинга]]></comment>
+			</column>
+			<column name="description" type="varchar" length="100" jt="12" >
+				<comment><![CDATA[Описание рейтинга]]></comment>
+			</column>
+			<index name="pk_ratings_id" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+		</table>
+		<table name="users" >
+			<comment><![CDATA[Пользователи]]></comment>
+			<column name="id" type="bigint" jt="-5" mandatory="y" >
+				<comment><![CDATA[Индентификатор]]></comment>
+			</column>
+			<column name="email" type="varchar" length="255" jt="12" mandatory="y" >
+				<comment><![CDATA[Электронный почтовый адрес]]></comment>
+			</column>
+			<column name="login" type="varchar" length="20" jt="12" mandatory="y" >
+				<comment><![CDATA[Логин пользователя]]></comment>
+			</column>
+			<column name="name" type="varchar" length="255" jt="12" >
+				<comment><![CDATA[Имя пользователя]]></comment>
+			</column>
+			<column name="birthday" type="date" jt="91" >
+				<comment><![CDATA[Дата рождения пользователя]]></comment>
+			</column>
+			<index name="pk_users_id" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+		</table>
+	</schema>
+	<layout name="Default Layout" id="Layout_1f84aee" show_relation="columns" >
+		<comment><![CDATA[filmorate v1.0]]></comment>
+		<entity schema="filmorate" name="users" color="C1D8EE" x="48" y="48" />
+		<entity schema="filmorate" name="friendships" color="C1D8EE" x="288" y="48" />
+		<entity schema="filmorate" name="likes" color="C1D8EE" x="48" y="256" />
+		<entity schema="filmorate" name="films" color="C1D8EE" x="208" y="256" />
+		<entity schema="filmorate" name="ratings" color="C1D8EE" x="400" y="256" />
+		<entity schema="filmorate" name="film_genres" color="C1D8EE" x="48" y="432" />
+		<entity schema="filmorate" name="genres" color="C1D8EE" x="240" y="432" />
+	</layout>
+</project>
