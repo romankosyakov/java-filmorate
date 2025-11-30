@@ -1,0 +1,117 @@
+[33m581d86e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32madd-database[m[33m, [m[1;31morigin/add-database[m[33m)[m 12-ФЗ. DAO
+dbSchemaDescription/filmorate v1.1.dbs
+dbSchemaDescription/filmorate v1.1.html
+dbSchemaDescription/filmorate v1.1.png
+pom.xml
+src/main/java/ru/yandex/practicum/filmorate/controller/ErrorHandler.java
+src/main/java/ru/yandex/practicum/filmorate/controller/FilmController.java
+src/main/java/ru/yandex/practicum/filmorate/controller/GenreController.java
+src/main/java/ru/yandex/practicum/filmorate/controller/MpaController.java
+src/main/java/ru/yandex/practicum/filmorate/controller/UserController.java
+src/main/java/ru/yandex/practicum/filmorate/model/Film.java
+src/main/java/ru/yandex/practicum/filmorate/model/Genre.java
+src/main/java/ru/yandex/practicum/filmorate/model/Mpa.java
+src/main/java/ru/yandex/practicum/filmorate/model/User.java
+src/main/java/ru/yandex/practicum/filmorate/service/FilmService.java
+src/main/java/ru/yandex/practicum/filmorate/service/UserService.java
+src/main/java/ru/yandex/practicum/filmorate/storage/FilmDbStorage.java
+src/main/java/ru/yandex/practicum/filmorate/storage/FriendshipDbStorage.java
+src/main/java/ru/yandex/practicum/filmorate/storage/GenreDbStorage.java
+src/main/java/ru/yandex/practicum/filmorate/storage/MpaDbStorage.java
+src/main/java/ru/yandex/practicum/filmorate/storage/UserDbStorage.java
+src/main/resources/application.properties
+src/main/resources/data.sql
+src/main/resources/schema.sql
+src/test/java/ru/yandex/practicum/filmorate/FilmorateApplicationTests.java
+src/test/java/ru/yandex/practicum/filmorate/controllerTest/ControllerValidationTest.java
+src/test/java/ru/yandex/practicum/filmorate/controllerTest/FilmControllerTest.java
+src/test/java/ru/yandex/practicum/filmorate/controllerTest/GenreControllerTest.java
+src/test/java/ru/yandex/practicum/filmorate/controllerTest/MpaControllerTest.java
+src/test/java/ru/yandex/practicum/filmorate/controllerTest/UserControllerTest.java
+src/test/java/ru/yandex/practicum/filmorate/modelTest/FilmTest.java
+src/test/java/ru/yandex/practicum/filmorate/modelTest/GenreTest.java
+src/test/java/ru/yandex/practicum/filmorate/modelTest/MpaTest.java
+src/test/java/ru/yandex/practicum/filmorate/modelTest/UserTest.java
+src/test/java/ru/yandex/practicum/filmorate/serviceTest/FilmServiceTest.java
+src/test/java/ru/yandex/practicum/filmorate/serviceTest/UserServiceTest.java
+src/test/java/ru/yandex/practicum/filmorate/storageTest/FilmDbStorageTest.java
+src/test/java/ru/yandex/practicum/filmorate/storageTest/FriendshipDbStorageTest.java
+src/test/java/ru/yandex/practicum/filmorate/storageTest/GenreDbStorageTest.java
+src/test/java/ru/yandex/practicum/filmorate/storageTest/InMemoryFilmStorageTest.java
+src/test/java/ru/yandex/practicum/filmorate/storageTest/InMemoryUserStorageTest.java
+src/test/java/ru/yandex/practicum/filmorate/storageTest/MpaDbStorageTest.java
+src/test/java/ru/yandex/practicum/filmorate/storageTest/UserDbStorageTest.java
+[33m0a800c7[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m Merge pull request #2
+[33mfb7c708[m[33m ([m[1;31morigin/add-friends-likes[m[33m, [m[1;32madd-friends-likes[m[33m)[m 11-ФЗ
+src/main/java/ru/yandex/practicum/filmorate/service/UserService.java
+[33m00628ce[m 11-ФЗ. 2я итерация
+src/main/java/ru/yandex/practicum/filmorate/model/Film.java
+src/main/java/ru/yandex/practicum/filmorate/service/UserService.java
+src/main/java/ru/yandex/practicum/filmorate/storage/InMemoryFilmStorage.java
+src/test/java/ru/yandex/practicum/filmorate/FilmorateApplicationTests.java
+src/test/java/ru/yandex/practicum/filmorate/controllerTest/FilmControllerTest.java
+src/test/java/ru/yandex/practicum/filmorate/controllerTest/UserControllerTest.java
+src/test/java/ru/yandex/practicum/filmorate/storageTest/InMemoryFilmStorageTest.java
+[33m6eb00c1[m 11-ФЗ. 2я итерация
+src/main/java/ru/yandex/practicum/filmorate/controller/FilmController.java
+src/main/java/ru/yandex/practicum/filmorate/controller/UserController.java
+src/main/java/ru/yandex/practicum/filmorate/model/Film.java
+src/main/java/ru/yandex/practicum/filmorate/service/FilmService.java
+src/main/java/ru/yandex/practicum/filmorate/service/UserService.java
+src/main/java/ru/yandex/practicum/filmorate/storage/FilmStorage.java
+src/main/java/ru/yandex/practicum/filmorate/storage/InMemoryFilmStorage.java
+src/main/java/ru/yandex/practicum/filmorate/storage/InMemoryUserStorage.java
+src/main/java/ru/yandex/practicum/filmorate/storage/UserStorage.java
+src/test/java/ru/yandex/practicum/filmorate/FilmorateApplicationTests.java
+src/test/java/ru/yandex/practicum/filmorate/controllerTest/FilmControllerTest.java
+src/test/java/ru/yandex/practicum/filmorate/controllerTest/UserControllerTest.java
+src/test/java/ru/yandex/practicum/filmorate/serviceTest/FilmServiceTest.java
+src/test/java/ru/yandex/practicum/filmorate/serviceTest/UserServiceTest.java
+src/test/java/ru/yandex/practicum/filmorate/storageTest/InMemoryFilmStorageTest.java
+src/test/java/ru/yandex/practicum/filmorate/storageTest/InMemoryUserStorageTest.java
+[33m17d51de[m 11-ФЗ
+src/main/java/ru/yandex/practicum/filmorate/controller/ErrorHandler.java
+src/main/java/ru/yandex/practicum/filmorate/exceptions/AutisticException.java
+src/main/java/ru/yandex/practicum/filmorate/service/UserService.java
+src/test/java/ru/yandex/practicum/filmorate/controllerTest/UserControllerTest.java
+src/test/java/ru/yandex/practicum/filmorate/serviceTest/UserServiceTest.java
+[33m4e150a0[m 11-ФЗ
+src/main/java/ru/yandex/practicum/filmorate/service/FilmService.java
+src/main/java/ru/yandex/practicum/filmorate/service/UserService.java
+[33m8eaae17[m 11-ФЗ
+pom.xml
+src/main/java/ru/yandex/practicum/filmorate/FilmorateApplication.java
+src/main/java/ru/yandex/practicum/filmorate/controller/ErrorHandler.java
+src/main/java/ru/yandex/practicum/filmorate/controller/FilmController.java
+src/main/java/ru/yandex/practicum/filmorate/controller/UserController.java
+src/main/java/ru/yandex/practicum/filmorate/exceptions/AutisticException.java
+src/main/java/ru/yandex/practicum/filmorate/model/Film.java
+src/main/java/ru/yandex/practicum/filmorate/model/User.java
+src/main/java/ru/yandex/practicum/filmorate/service/FilmService.java
+src/main/java/ru/yandex/practicum/filmorate/service/UserService.java
+src/main/java/ru/yandex/practicum/filmorate/storage/FilmStorage.java
+src/main/java/ru/yandex/practicum/filmorate/storage/InMemoryFilmStorage.java
+src/main/java/ru/yandex/practicum/filmorate/storage/InMemoryUserStorage.java
+src/main/java/ru/yandex/practicum/filmorate/storage/UserStorage.java
+src/main/resources/application.properties
+src/main/resources/application.yaml
+src/test/java/ru/yandex/practicum/filmorate/FilmorateApplicationTests.java
+src/test/java/ru/yandex/practicum/filmorate/controllerTest/ControllerValidationTest.java
+src/test/java/ru/yandex/practicum/filmorate/controllerTest/FilmControllerTest.java
+src/test/java/ru/yandex/practicum/filmorate/controllerTest/UserControllerTest.java
+src/test/java/ru/yandex/practicum/filmorate/modelTest/FilmTest.java
+src/test/java/ru/yandex/practicum/filmorate/modelTest/UserTest.java
+src/test/java/ru/yandex/practicum/filmorate/serviceTest/FilmServiceTest.java
+src/test/java/ru/yandex/practicum/filmorate/serviceTest/UserServiceTest.java
+src/test/java/ru/yandex/practicum/filmorate/storageTest/InMemoryFilmStorageTest.java
+src/test/java/ru/yandex/practicum/filmorate/storageTest/InMemoryUserStorageTest.java
+[33me51a37c[m Merge pull request #1 from romankosyakov/controllers-films-users
+[33mce7f4e0[m[33m ([m[1;32mcontrollers-films-users[m[33m)[m 10-ФЗ. 3я итерация
+src/main/java/ru/yandex/practicum/filmorate/annotation/MinReleaseDate.java
+src/main/java/ru/yandex/practicum/filmorate/controller/FilmController.java
+src/main/java/ru/yandex/practicum/filmorate/controller/UserController.java
+src/main/java/ru/yandex/practicum/filmorate/model/Film.java
+src/main/java/ru/yandex/practicum/filmorate/model/User.java
+src/main/java/ru/yandex/practicum/filmorate/validation/CreateValidation.java
+src/main/java/ru/yandex/practicum/filmorate/validation/UpdateValidation.java
+src/test/java/ru
