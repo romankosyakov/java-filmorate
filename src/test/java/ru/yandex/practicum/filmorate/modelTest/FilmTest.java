@@ -7,6 +7,7 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.validation.CreateValidation;
 import ru.yandex.practicum.filmorate.validation.UpdateValidation;
 
@@ -30,6 +31,7 @@ class FilmTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
     }
 
@@ -40,6 +42,7 @@ class FilmTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(filmForCreate, CreateValidation.class);
@@ -59,6 +62,7 @@ class FilmTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
@@ -73,6 +77,7 @@ class FilmTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, UpdateValidation.class);
@@ -89,6 +94,7 @@ class FilmTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
@@ -103,6 +109,7 @@ class FilmTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
@@ -118,6 +125,7 @@ class FilmTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, UpdateValidation.class);
@@ -132,6 +140,7 @@ class FilmTest {
                 .description(longDescription)
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
@@ -146,6 +155,7 @@ class FilmTest {
                 .description(maxLengthDescription)
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
@@ -159,6 +169,7 @@ class FilmTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(1895, 12, 27))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
@@ -173,6 +184,7 @@ class FilmTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(1895, 12, 27))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, UpdateValidation.class);
@@ -186,6 +198,7 @@ class FilmTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(1895, 12, 28))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
@@ -199,6 +212,7 @@ class FilmTest {
                 .description("Valid description")
                 .releaseDate(null)
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
@@ -213,6 +227,7 @@ class FilmTest {
                 .description("Valid description")
                 .releaseDate(null)
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, UpdateValidation.class);
@@ -229,6 +244,7 @@ class FilmTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(0)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
@@ -242,6 +258,7 @@ class FilmTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(-1)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
@@ -255,6 +272,7 @@ class FilmTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(1)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
@@ -269,9 +287,24 @@ class FilmTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, UpdateValidation.class);
+        assertFalse(violations.isEmpty());
+    }
+
+    @Test
+    void shouldFailWhenMpaIsNullForCreation() {
+        Film film = Film.builder()
+                .name("Valid Film")
+                .description("Valid description")
+                .releaseDate(LocalDate.of(2000, 1, 1))
+                .duration(120)
+                .mpa(null)
+                .build();
+
+        Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
         assertFalse(violations.isEmpty());
     }
 
@@ -282,9 +315,10 @@ class FilmTest {
                 .description("Test Description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
-        assertNotNull(film.getFilmLikes());
-        assertTrue(film.getFilmLikes().isEmpty());
+        assertNotNull(film.getLikes());
+        assertTrue(film.getLikes().isEmpty());
     }
 }

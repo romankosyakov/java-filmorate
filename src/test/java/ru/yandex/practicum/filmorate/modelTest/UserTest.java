@@ -66,6 +66,19 @@ class UserTest {
     }
 
     @Test
+    void shouldUseLoginWhenNameIsNull() {
+        User user = User.builder()
+                .id(1L)
+                .email("test@mail.com")
+                .login("testuser")
+                .name(null)
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
+        assertEquals("testuser", user.getName());
+    }
+
+    @Test
     void shouldFailWhenEmailIsBlankForCreation() {
         User user = User.builder()
                 .email("")
@@ -284,18 +297,5 @@ class UserTest {
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, UpdateValidation.class);
         assertFalse(violations.isEmpty());
-    }
-
-    @Test
-    void shouldInitializeUserFriendsAsEmptySet() {
-        User user = User.builder()
-                .email("test@mail.com")
-                .login("testuser")
-                .name("Test User")
-                .birthday(LocalDate.of(2000, 1, 1))
-                .build();
-
-        assertNotNull(user.getUserFriends());
-        assertTrue(user.getUserFriends().isEmpty());
     }
 }

@@ -8,12 +8,11 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.UserDbStorage;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Data
@@ -22,35 +21,35 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmService {
 
-    private final UserStorage userStorage;
-    private final FilmStorage filmStorage;
+    private final UserDbStorage userDbStorage;
+    private final FilmDbStorage filmDbStorage;
 
     public void putLike(int filmID, long userID) {
         validateFilmAndUser(filmID, userID);
-        Film film = filmStorage.getFilm(filmID);
-        Set<Long> filmLikes = film.getFilmLikes();
-        if (filmLikes.contains(userID)) {
+
+        Film film = filmDbStorage.getFilm(filmID);
+        if (film.getLikes().contains(userID)) {
             throw new ValidationException("Пользователь с ID " + userID + " уже поставил лайк этому фильму.");
         } else {
-            filmLikes.add(userID);
+            filmDbStorage.addLike(filmID, userID);
             log.info("Пользователь с ID {} поставил лайк фильму с ID {}.", userID, filmID);
         }
     }
 
     public void deleteLike(int filmID, long userID) {
         validateFilmAndUser(filmID, userID);
-        Film film = filmStorage.getFilm(filmID);
-        Set<Long> filmLikes = film.getFilmLikes();
-        if (!filmLikes.contains(userID)) {
+
+        Film film = filmDbStorage.getFilm(filmID);
+        if (!film.getLikes().contains(userID)) {
             throw new ValidationException("Пользователь с ID " + userID + " не ставил лайк этому фильму.");
         } else {
-            filmLikes.remove(userID);
+            filmDbStorage.removeLike(filmID, userID);
             log.info("Пользователь с ID {} удалил лайк фильму с ID {}.", userID, filmID);
         }
     }
 
     public List<Film> showMostLikedFilms(Integer countToShow) {
-        List<Film> films = filmStorage.getAllFilms();
+        List<Film> films = filmDbStorage.getAllFilms();
         return films.stream()
                 .sorted(Comparator.comparingLong(Film::getRate).reversed())
                 .limit(countToShow)
@@ -58,8 +57,8 @@ public class FilmService {
     }
 
     private void validateFilmAndUser(int filmID, long userID) {
-        Film film = filmStorage.getFilm(filmID);
-        User user = userStorage.getUser(userID);
+        Film film = filmDbStorage.getFilm(filmID);
+        User user = userDbStorage.getUser(userID);
         if (user == null) {
             throw new NotFoundException("Пользователь с ID " + userID + " не найден.");
         }
@@ -67,4 +66,5 @@ public class FilmService {
             throw new NotFoundException("Фильм с ID " + filmID + " не найден.");
         }
     }
+
 }
