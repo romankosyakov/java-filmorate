@@ -8,7 +8,9 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Repository
 @Slf4j
@@ -41,4 +43,21 @@ public class GenreDbStorage {
         return genres.getFirst();
     }
 
+    public Map<Integer, Genre> getGenresByIds(Collection<Integer> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        List<Object> params = new ArrayList<>(ids);
+
+        String placeholders = String.join(",",
+                Collections.nCopies(ids.size(), "?"));
+
+        String sql = "SELECT * FROM genres WHERE id IN (" + placeholders + ")";
+
+        List<Genre> genres = jdbcTemplate.query(sql, genreRowMapper, params.toArray());
+
+        return genres.stream()
+                .collect(Collectors.toMap(Genre::getId, Function.identity()));
+    }
 }
