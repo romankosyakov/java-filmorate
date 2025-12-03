@@ -12,18 +12,17 @@ import ru.yandex.practicum.filmorate.validation.CreateValidation;
 import ru.yandex.practicum.filmorate.validation.UpdateValidation;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-/**
- * Film.
- */
 @Data
 @Builder
 @AllArgsConstructor
 public class Film {
     @NotNull(groups = UpdateValidation.class, message = "ID фильма обязателен для обновления")
-    private final Integer id;
+    private Integer id;
 
     @NotBlank(message = "Название фильма не может быть пустым", groups = CreateValidation.class)
     @Size(max = 100, message = "Название фильма не может быть длиннее 100 символов",
@@ -42,9 +41,16 @@ public class Film {
             groups = {CreateValidation.class, UpdateValidation.class})
     private Integer duration;
 
-    private final Set<Long> filmLikes = new HashSet<>();
+    @NotNull(message = "Рейтинг MPA обязателен", groups = CreateValidation.class)
+    private Mpa mpa;
+
+    @Builder.Default
+    private List<Genre> genres = new ArrayList<>();
+
+    @Builder.Default
+    private final Set<Long> likes = new HashSet<>();
 
     public int getRate() {
-        return filmLikes.size();
+        return likes.size();
     }
 }

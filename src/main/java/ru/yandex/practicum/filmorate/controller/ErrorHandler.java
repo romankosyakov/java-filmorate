@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -44,10 +45,26 @@ public class ErrorHandler {
         return new ErrorResponse("Validation Error", "Invalid request parameters", errors);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleIllegalArgumentException(final IllegalArgumentException e) {
+        log.error("Некорректный аргумент: {}", e.getMessage());
+        return new ErrorResponse("Bad Request", e.getMessage());
+    }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleOtherExceptions(final Throwable e) {
         log.error("Внутренняя ошибка сервера: {}", e.getMessage(), e);
-        return new ErrorResponse("Internal Server Error", "An unexpected error occurred");
+        // Для отладки выведем stack trace
+        e.printStackTrace();
+        return new ErrorResponse("Internal Server Error", "An unexpected error occurred: " + e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleHttpMessageNotReadable(final HttpMessageNotReadableException e) {
+        log.error("Ошибка парсинга JSON: {}", e.getMessage());
+        return new ErrorResponse("JSON Parse Error", "Invalid JSON format: " + e.getMostSpecificCause().getMessage());
     }
 }

@@ -7,6 +7,7 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.validation.CreateValidation;
 import ru.yandex.practicum.filmorate.validation.UpdateValidation;
@@ -27,6 +28,7 @@ class ControllerValidationTest {
         }
     }
 
+    // Film Validation Tests
     @Test
     void shouldFailValidationWhenFilmNameIsBlankForCreation() {
         Film film = Film.builder()
@@ -34,10 +36,10 @@ class ControllerValidationTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
-
         assertFalse(violations.isEmpty());
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("name")));
     }
@@ -49,10 +51,10 @@ class ControllerValidationTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
-
         assertFalse(violations.isEmpty());
     }
 
@@ -64,10 +66,10 @@ class ControllerValidationTest {
                 .description(longDescription)
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
-
         assertFalse(violations.isEmpty());
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("description")));
     }
@@ -80,10 +82,10 @@ class ControllerValidationTest {
                 .description(maxLengthDescription)
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
-
         assertTrue(violations.isEmpty());
     }
 
@@ -94,10 +96,10 @@ class ControllerValidationTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(1895, 12, 27))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
-
         assertFalse(violations.isEmpty());
     }
 
@@ -108,10 +110,10 @@ class ControllerValidationTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(1895, 12, 28))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
-
         assertTrue(violations.isEmpty());
     }
 
@@ -122,10 +124,10 @@ class ControllerValidationTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(0)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
-
         assertFalse(violations.isEmpty());
     }
 
@@ -136,10 +138,10 @@ class ControllerValidationTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(-1)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
-
         assertFalse(violations.isEmpty());
     }
 
@@ -150,10 +152,10 @@ class ControllerValidationTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(1)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, CreateValidation.class);
-
         assertTrue(violations.isEmpty());
     }
 
@@ -165,10 +167,10 @@ class ControllerValidationTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, UpdateValidation.class);
-
         assertFalse(violations.isEmpty());
     }
 
@@ -180,15 +182,16 @@ class ControllerValidationTest {
                 .description("Valid description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
+                .mpa(Mpa.builder().id(1).build())
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film, UpdateValidation.class);
-
         boolean hasNotBlankViolation = violations.stream()
                 .anyMatch(v -> v.getMessage().contains("не может быть пустым"));
         assertFalse(hasNotBlankViolation);
     }
 
+    // User Validation Tests
     @Test
     void shouldFailValidationWhenUserEmailIsBlankForCreation() {
         User user = User.builder()
@@ -198,7 +201,6 @@ class ControllerValidationTest {
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
-
         assertFalse(violations.isEmpty());
     }
 
@@ -211,7 +213,6 @@ class ControllerValidationTest {
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
-
         assertFalse(violations.isEmpty());
     }
 
@@ -224,7 +225,6 @@ class ControllerValidationTest {
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
-
         assertFalse(violations.isEmpty());
     }
 
@@ -237,7 +237,6 @@ class ControllerValidationTest {
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
-
         assertFalse(violations.isEmpty());
     }
 
@@ -250,7 +249,6 @@ class ControllerValidationTest {
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
-
         assertFalse(violations.isEmpty());
     }
 
@@ -263,7 +261,6 @@ class ControllerValidationTest {
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
-
         assertTrue(violations.isEmpty());
     }
 
@@ -277,7 +274,6 @@ class ControllerValidationTest {
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
-
         assertFalse(violations.isEmpty());
     }
 
@@ -291,7 +287,6 @@ class ControllerValidationTest {
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
-
         assertTrue(violations.isEmpty());
     }
 
@@ -304,7 +299,6 @@ class ControllerValidationTest {
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
-
         assertFalse(violations.isEmpty());
     }
 
@@ -317,7 +311,6 @@ class ControllerValidationTest {
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
-
         assertTrue(violations.isEmpty());
     }
 
@@ -331,7 +324,6 @@ class ControllerValidationTest {
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
-
         assertTrue(violations.isEmpty());
     }
 
@@ -345,7 +337,6 @@ class ControllerValidationTest {
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, CreateValidation.class);
-
         assertTrue(violations.isEmpty());
     }
 
@@ -359,7 +350,6 @@ class ControllerValidationTest {
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, UpdateValidation.class);
-
         assertFalse(violations.isEmpty());
     }
 
@@ -373,7 +363,6 @@ class ControllerValidationTest {
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, UpdateValidation.class);
-
         boolean hasNotBlankViolation = violations.stream()
                 .anyMatch(v -> v.getMessage().contains("не может быть пустым"));
         assertFalse(hasNotBlankViolation);
@@ -389,7 +378,6 @@ class ControllerValidationTest {
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(user, UpdateValidation.class);
-
         boolean hasNotBlankViolation = violations.stream()
                 .anyMatch(v -> v.getMessage().contains("не может быть пустым"));
         assertFalse(hasNotBlankViolation);
