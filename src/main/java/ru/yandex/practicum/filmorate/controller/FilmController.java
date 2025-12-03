@@ -19,30 +19,29 @@ import java.util.List;
 public class FilmController {
     private final FilmService filmService;
 
-
     @GetMapping
     public List<Film> getAllFilms() {
         log.debug("Вызван метод получения списка всех фильмов");
-        return filmService.getFilmDbStorage().getAllFilms();
+        return filmService.getAllFilms();
     }
 
     @GetMapping("/{id}")
     public Film getFilm(@PathVariable int id) {
         log.debug("Вызван метод получения фильма с ID: {}", id);
-        return filmService.getFilmDbStorage().getFilm(id);
+        return filmService.getFilm(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Film addNewFilm(@Validated(CreateValidation.class) @RequestBody Film film) {
         log.debug("Вызван метод добавления нового фильма: {}", film.getName());
-        return filmService.getFilmDbStorage().addNewFilm(film);
+        return filmService.addNewFilm(film);
     }
 
     @PutMapping
     public Film updateFilm(@Validated(UpdateValidation.class) @RequestBody Film film) {
         log.debug("Вызван метод обновления фильма с ID: {}", film.getId());
-        return filmService.getFilmDbStorage().updateFilm(film);
+        return filmService.updateFilm(film);
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -58,8 +57,7 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopularFilms(
-            @RequestParam(defaultValue = "10") Integer count) {
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count) {
         log.debug("Вызван метод получения {} популярных фильмов", count);
         return filmService.showMostLikedFilms(count);
     }

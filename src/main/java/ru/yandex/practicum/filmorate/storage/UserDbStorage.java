@@ -47,7 +47,6 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User addNewUser(User user) {
-        // Безопасное получение следующего ID
         String nextIdSql = "SELECT COALESCE(MAX(id), 0) + 1 FROM users";
         Long nextId = jdbcTemplate.queryForObject(nextIdSql, Long.class);
 
@@ -60,7 +59,6 @@ public class UserDbStorage implements UserStorage {
                 user.getName(),
                 Date.valueOf(user.getBirthday()));
 
-        // Создаем пользователя с правильным ID
         User newUser = User.builder()
                 .id(nextId)
                 .email(user.getEmail())
@@ -94,6 +92,7 @@ public class UserDbStorage implements UserStorage {
         return getUser(userUpdate.getId());
     }
 
+    @Override
     public boolean userExists(long userId) {
         String sql = "SELECT COUNT(*) FROM users WHERE id = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, userId);

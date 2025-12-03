@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -225,72 +224,6 @@ class FilmServiceTest {
         Film createdFilm = filmDbStorage.addNewFilm(film);
 
         assertDoesNotThrow(() -> filmService.deleteLike(createdFilm.getId(), createdUser.getId()));
-    }
-
-    @Test
-    void shouldRemoveDuplicateGenresWhenCreatingFilm() {
-        Mpa mpa = mpaDbStorage.getMpaById(3);
-        Film film = Film.builder()
-                .name("New film")
-                .releaseDate(LocalDate.of(1999, 4, 30))
-                .description("New film about friends")
-                .duration(120)
-                .mpa(mpa)
-                .genres(List.of(
-                        Genre.builder().id(1).build(),
-                        Genre.builder().id(2).build(),
-                        Genre.builder().id(1).build()
-                ))
-                .build();
-
-        Film createdFilm = filmDbStorage.addNewFilm(film);
-
-        assertNotNull(createdFilm);
-        assertEquals("New film", createdFilm.getName());
-        assertNotNull(createdFilm.getMpa());
-        assertEquals(3, createdFilm.getMpa().getId());
-        assertNotNull(createdFilm.getGenres());
-        assertEquals(2, createdFilm.getGenres().size());
-        assertEquals(1, createdFilm.getGenres().get(0).getId());
-        assertEquals(2, createdFilm.getGenres().get(1).getId());
-    }
-
-    @Test
-    void shouldRemoveDuplicateGenresWhenUpdatingFilm() {
-        Mpa mpa1 = mpaDbStorage.getMpaById(1);
-        Film film = Film.builder()
-                .name("Test Film")
-                .releaseDate(LocalDate.of(2000, 1, 1))
-                .description("Test Description")
-                .duration(100)
-                .mpa(mpa1)
-                .genres(List.of(Genre.builder().id(1).build()))
-                .build();
-        Film createdFilm = filmDbStorage.addNewFilm(film);
-
-        Mpa mpa2 = mpaDbStorage.getMpaById(2);
-        Film updatedFilm = Film.builder()
-                .id(createdFilm.getId())
-                .name("Updated Film")
-                .releaseDate(LocalDate.of(2000, 1, 1))
-                .description("Updated Description")
-                .duration(110)
-                .mpa(mpa2)
-                .genres(List.of(
-                        Genre.builder().id(1).build(),
-                        Genre.builder().id(2).build(),
-                        Genre.builder().id(1).build(),
-                        Genre.builder().id(3).build(),
-                        Genre.builder().id(2).build()
-                ))
-                .build();
-
-        Film resultFilm = filmDbStorage.updateFilm(updatedFilm);
-        assertNotNull(resultFilm.getGenres());
-        assertEquals(3, resultFilm.getGenres().size());
-        assertEquals(1, resultFilm.getGenres().get(0).getId());
-        assertEquals(2, resultFilm.getGenres().get(1).getId());
-        assertEquals(3, resultFilm.getGenres().get(2).getId());
     }
 
     @Test

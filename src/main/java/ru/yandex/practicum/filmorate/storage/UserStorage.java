@@ -13,4 +13,5 @@ public interface UserStorage {
 
     User updateUser(User userUpdate);
 
+    boolean userExists(long userId);
 }

@@ -9,13 +9,11 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Repository
 @Slf4j
 @RequiredArgsConstructor
-public class GenreDbStorage {
+public class GenreDbStorage implements GenreStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -24,6 +22,7 @@ public class GenreDbStorage {
             .name(rs.getString("name"))
             .build();
 
+    @Override
     public List<Genre> getAllGenres() {
         String sql = "SELECT * FROM genres ORDER BY id";
         List<Genre> genres = jdbcTemplate.query(sql, genreRowMapper);
@@ -31,6 +30,7 @@ public class GenreDbStorage {
         return genres;
     }
 
+    @Override
     public Genre getGenreById(int id) {
         String sql = "SELECT * FROM genres WHERE id = ?";
         List<Genre> genres = jdbcTemplate.query(sql, genreRowMapper, id);
@@ -43,21 +43,4 @@ public class GenreDbStorage {
         return genres.getFirst();
     }
 
-    public Map<Integer, Genre> getGenresByIds(Collection<Integer> ids) {
-        if (ids == null || ids.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        List<Object> params = new ArrayList<>(ids);
-
-        String placeholders = String.join(",",
-                Collections.nCopies(ids.size(), "?"));
-
-        String sql = "SELECT * FROM genres WHERE id IN (" + placeholders + ")";
-
-        List<Genre> genres = jdbcTemplate.query(sql, genreRowMapper, params.toArray());
-
-        return genres.stream()
-                .collect(Collectors.toMap(Genre::getId, Function.identity()));
-    }
 }

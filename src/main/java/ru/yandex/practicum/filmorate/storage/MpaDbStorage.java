@@ -13,7 +13,7 @@ import java.util.List;
 @Repository
 @Slf4j
 @RequiredArgsConstructor
-public class MpaDbStorage {
+public class MpaDbStorage implements MpaStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -23,6 +23,7 @@ public class MpaDbStorage {
             .description(rs.getString("description"))
             .build();
 
+    @Override
     public List<Mpa> getAllMpa() {
         String sql = "SELECT * FROM ratings ORDER BY id";
         List<Mpa> mpaList = jdbcTemplate.query(sql, mpaRowMapper);
@@ -30,6 +31,7 @@ public class MpaDbStorage {
         return mpaList;
     }
 
+    @Override
     public Mpa getMpaById(int id) {
         String sql = "SELECT * FROM ratings WHERE id = ?";
         List<Mpa> mpaList = jdbcTemplate.query(sql, mpaRowMapper, id);

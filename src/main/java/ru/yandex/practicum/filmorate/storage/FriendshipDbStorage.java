@@ -13,7 +13,7 @@ import java.util.List;
 @Repository
 @Slf4j
 @RequiredArgsConstructor
-public class FriendshipDbStorage {
+public class FriendshipDbStorage implements FriendshipStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private final UserDbStorage userDbStorage;
@@ -26,6 +26,7 @@ public class FriendshipDbStorage {
             .birthday(rs.getDate("birthday").toLocalDate())
             .build();
 
+    @Override
     public void addFriend(Long userId, Long friendId) {
         validateUsers(userId, friendId);
 
@@ -43,6 +44,7 @@ public class FriendshipDbStorage {
         log.info("Пользователь {} добавил в друзья пользователя {}", userId, friendId);
     }
 
+    @Override
     public void removeFriend(Long userId, Long friendId) {
         validateUsers(userId, friendId);
 
@@ -57,10 +59,9 @@ public class FriendshipDbStorage {
         log.info("Пользователь {} удалил из друзей пользователя {}", userId, friendId);
     }
 
+    @Override
     public List<User> getFriends(Long userId) {
-        if (!userDbStorage.userExists(userId)) {
-            throw new NotFoundException("Пользователь с ID " + userId + " не найден");
-        }
+
 
         String sql = "SELECT u.* FROM users u " +
                 "JOIN friendships f ON u.id = f.friend_id " +
@@ -70,6 +71,7 @@ public class FriendshipDbStorage {
         return jdbcTemplate.query(sql, userRowMapper, userId);
     }
 
+    @Override
     public List<User> getCommonFriends(Long userId1, Long userId2) {
         validateUsers(userId1, userId2);
 
@@ -82,7 +84,8 @@ public class FriendshipDbStorage {
         return jdbcTemplate.query(sql, userRowMapper, userId1, userId2);
     }
 
-    private void validateUsers(Long userId, Long friendId) {
+    @Override
+    public void validateUsers(Long userId, Long friendId) {
         if (!userDbStorage.userExists(userId)) {
             throw new NotFoundException("Пользователь с ID " + userId + " не найден");
         }
@@ -91,7 +94,8 @@ public class FriendshipDbStorage {
         }
     }
 
-    private boolean friendshipExists(Long userId, Long friendId) {
+    @Override
+    public boolean friendshipExists(Long userId, Long friendId) {
         String sql = "SELECT COUNT(*) FROM friendships WHERE user_id = ? AND friend_id = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, userId, friendId);
         return count > 0;
